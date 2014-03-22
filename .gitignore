@@ -1,0 +1,5 @@
+#compiled files
+*.class
+
+#text files
+*.txt
