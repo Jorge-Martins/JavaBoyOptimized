@@ -38,6 +38,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.util.StringTokenizer;
+
 import javax.sound.sampled.*;
 /** This class represents a palette.  There can be three
  *  palettes, one for the background and window, and two
@@ -65,6 +66,52 @@ class GameboyPalette {
  public GameboyPalette(int pal) {
   decodePalette(pal);
  } 
+ 
+ public void saveData(DataOutputStream sv, String directory){
+    try{       
+       sv.writeShort(data[0]);
+       sv.writeShort(data[1]);
+       sv.writeShort(data[2]);
+       sv.writeShort(data[3]);
+       
+       sv.writeInt(gbcData[0]);
+       sv.writeInt(gbcData[1]);
+       sv.writeInt(gbcData[2]);
+       sv.writeInt(gbcData[3]);
+
+       sv.writeInt(colours[0]);
+       sv.writeInt(colours[1]);
+       sv.writeInt(colours[2]);
+       sv.writeInt(colours[3]);
+     
+    } catch (IOException e) {
+       System.out.println("Dmgcpu.saveState\\GameboyPalette.loadData: Could not write to file " + directory);
+       System.out.println("Error Message: " + e.getMessage());
+    }
+ }
+ 
+public void loadData(DataInputStream sv, String directory){
+   try{       
+      data[0] = sv.readShort();
+      data[1] = sv.readShort();
+      data[2] = sv.readShort();
+      data[3] = sv.readShort();
+      
+      gbcData[0] = sv.readInt();
+      gbcData[1] = sv.readInt();
+      gbcData[2] = sv.readInt();
+      gbcData[3] = sv.readInt();
+
+      colours[0] = sv.readInt();
+      colours[1] = sv.readInt();
+      colours[2] = sv.readInt();
+      colours[3] = sv.readInt();
+
+   } catch (IOException e) {
+      System.out.println("Dmgcpu.saveState\\GameboyPalette.loadData: Could not read file " + directory);
+      System.out.println("Error Message: " + e.getMessage());
+   }
+ }
 
 /** Change the colour mappings */
  public void setColours(int c1, int c2, int c3, int c4) {

@@ -47,23 +47,23 @@ import javax.sound.sampled.*;
  */
 class SoundChip {
    /** The DataLine for outputting the sound */
-   SourceDataLine         soundLine;
+   SourceDataLine soundLine;
 
-   SquareWaveGenerator    channel1;
-   SquareWaveGenerator    channel2;
+   SquareWaveGenerator channel1;
+   SquareWaveGenerator channel2;
    VoluntaryWaveGenerator channel3;
-   NoiseGenerator         channel4;
-   boolean                soundEnabled     = false;
+   NoiseGenerator channel4;
+   boolean soundEnabled = false;
 
    /** If true, channel is enabled */
-   boolean                channel1Enable   = true, channel2Enable = true, channel3Enable = true,
+   boolean channel1Enable = true, channel2Enable = true, channel3Enable = true,
             channel4Enable = true;
 
    /** Current sampling rate that sound is output at */
-   int                    sampleRate       = 44100;
+   int sampleRate = 44100;
 
    /** Amount of sound data to buffer before playback */
-   int                    bufferLengthMsec = 200;
+   int bufferLengthMsec = 200;
 
    /** Initialize sound emulation, and allocate sound hardware */
    public SoundChip() {
@@ -107,8 +107,7 @@ class SoundChip {
    public void setVolume(float vol) {
       if (soundLine.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
          try {
-            FloatControl volume = (FloatControl) soundLine
-                     .getControl(FloatControl.Type.MASTER_GAIN);
+            FloatControl volume = (FloatControl) soundLine.getControl(FloatControl.Type.MASTER_GAIN);
             volume.setValue(vol);
             System.out.println("Volume is now " + volume.getValue());
             if (vol > -70) {

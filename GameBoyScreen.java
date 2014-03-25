@@ -258,12 +258,12 @@ class GameBoyScreen extends Frame implements ActionListener, ComponentListener, 
       emulationSaveState.addActionListener(this);
 
       MenuItem emulationLoadState = new MenuItem("Load State");
-      emulationSaveState.setActionCommand("Load State");
-      emulationSaveState.addActionListener(this);
+      emulationLoadState.setActionCommand("Load State");
+      emulationLoadState.addActionListener(this);
 
       MenuItem emulationLoadCheckpoint = new MenuItem("Load Checkpoint");
-      emulationSaveState.setActionCommand("Load Checkpoint");
-      emulationSaveState.addActionListener(this);
+      emulationLoadCheckpoint.setActionCommand("Load Checkpoint");
+      emulationLoadCheckpoint.addActionListener(this);
 
       emulationSpeed100 = new CheckboxMenuItem("Speed 100%");
       emulationSpeed100.addItemListener(this);
@@ -564,8 +564,9 @@ class GameBoyScreen extends Frame implements ActionListener, ComponentListener, 
             setChannelEnable();
             applet.dmgcpu.allowGbcFeatures = fileGameboyColor.getState();
             applet.dmgcpu.reset();
+            applet.queueDebuggerCommand("g");
+            applet.dmgcpu.terminate = true;
          }
-
       } else if (command.equals("Frame counter")) {
          viewFrameCounter.setState(!viewFrameCounter.getState());
       } else if (command.equals("Speed throttle")) {
@@ -633,6 +634,20 @@ class GameBoyScreen extends Frame implements ActionListener, ComponentListener, 
       } else if (command.equals("Exit")) {
          applet.dispose();
          System.exit(0);
+         
+         //New Stuff TODO>>>>>
+      } else if (command.equals("Save State")){
+         if (applet.dmgcpu != null) {
+            applet.dmgcpu.saveState(".stsv");
+         }
+      } else if (command.equals("Load State")){
+         if (applet.dmgcpu != null) {
+            applet.dmgcpu.loadState(".stsv");
+         }
+      } else if (command.equals("Load Checkpoint")){
+         if (applet.dmgcpu != null) {
+            applet.dmgcpu.loadState(".cksv");
+         }
       }
    }
 
