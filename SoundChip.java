@@ -107,7 +107,8 @@ class SoundChip {
    public void setVolume(float vol) {
       if (soundLine.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
          try {
-            FloatControl volume = (FloatControl) soundLine.getControl(FloatControl.Type.MASTER_GAIN);
+            FloatControl volume = (FloatControl) soundLine
+                     .getControl(FloatControl.Type.MASTER_GAIN);
             volume.setValue(vol);
             System.out.println("Volume is now " + volume.getValue());
             if (vol > -70) {
@@ -170,5 +171,4 @@ class SoundChip {
          soundLine.write(b, 0, numSamples);
       }
    }
-
 }

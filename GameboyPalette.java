@@ -45,142 +45,144 @@ import javax.sound.sampled.*;
  *  for sprites. 
  */
 
-class GameboyPalette { 
+class GameboyPalette {
 
-/** Data for which colour maps to which RGB value */
- short[] data = new short[4];
+   /** Data for which colour maps to which RGB value */
+   short[] data = new short[4];
 
- int[] gbcData = new int[4];
+   int[] gbcData = new int[4];
 
- /** Default RGB colour values */
- int[] colours = {0xFFFFFFFF, 0xFFAAAAAA, 0xFF555555, 0xFF000000};
+   /** Default RGB colour values */
+   int[] colours = { 0xFFFFFFFF, 0xFFAAAAAA, 0xFF555555, 0xFF000000 };
 
- /** Create a palette with the specified colour mappings */
- public GameboyPalette(int c1, int c2, int c3, int c4) {  data[0] = (short) c1;
-  data[1] = (short) c2;
-  data[2] = (short) c3;
-  data[3] = (short) c4;
- }
-
- /** Create a palette from the internal Gameboy format */
- public GameboyPalette(int pal) {
-  decodePalette(pal);
- } 
- 
- public void saveData(DataOutputStream sv, String directory){
-    try{       
-       sv.writeShort(data[0]);
-       sv.writeShort(data[1]);
-       sv.writeShort(data[2]);
-       sv.writeShort(data[3]);
-       
-       sv.writeInt(gbcData[0]);
-       sv.writeInt(gbcData[1]);
-       sv.writeInt(gbcData[2]);
-       sv.writeInt(gbcData[3]);
-
-       sv.writeInt(colours[0]);
-       sv.writeInt(colours[1]);
-       sv.writeInt(colours[2]);
-       sv.writeInt(colours[3]);
-     
-    } catch (IOException e) {
-       System.out.println("Dmgcpu.saveState\\GameboyPalette.loadData: Could not write to file " + directory);
-       System.out.println("Error Message: " + e.getMessage());
-    }
- }
- 
-public void loadData(DataInputStream sv, String directory){
-   try{       
-      data[0] = sv.readShort();
-      data[1] = sv.readShort();
-      data[2] = sv.readShort();
-      data[3] = sv.readShort();
-      
-      gbcData[0] = sv.readInt();
-      gbcData[1] = sv.readInt();
-      gbcData[2] = sv.readInt();
-      gbcData[3] = sv.readInt();
-
-      colours[0] = sv.readInt();
-      colours[1] = sv.readInt();
-      colours[2] = sv.readInt();
-      colours[3] = sv.readInt();
-
-   } catch (IOException e) {
-      System.out.println("Dmgcpu.saveState\\GameboyPalette.loadData: Could not read file " + directory);
-      System.out.println("Error Message: " + e.getMessage());
+   /** Create a palette with the specified colour mappings */
+   public GameboyPalette(int c1, int c2, int c3, int c4) {
+      data[0] = (short) c1;
+      data[1] = (short) c2;
+      data[2] = (short) c3;
+      data[3] = (short) c4;
    }
- }
 
-/** Change the colour mappings */
- public void setColours(int c1, int c2, int c3, int c4) {
-  colours[0] = c1;
-  colours[1] = c2;
-  colours[2] = c3;
-  colours[3] = c4;
- }
+   /** Create a palette from the internal Gameboy format */
+   public GameboyPalette(int pal) {
+      decodePalette(pal);
+   }
 
- /** Get the palette from the internal Gameboy Color format */
- public byte getGbcColours(int entryNo, boolean high) {
-  if (high) {
-   return (byte) (gbcData[entryNo] >> 8);
+   public void saveData(DataOutputStream sv, String directory) {
+      try {
+         sv.writeShort(data[0]);
+         sv.writeShort(data[1]);
+         sv.writeShort(data[2]);
+         sv.writeShort(data[3]);
 
-  } else {
-   return (byte) (gbcData[entryNo] & 0x00FF);
+         sv.writeInt(gbcData[0]);
+         sv.writeInt(gbcData[1]);
+         sv.writeInt(gbcData[2]);
+         sv.writeInt(gbcData[3]);
 
-  }
- }
+         sv.writeInt(colours[0]);
+         sv.writeInt(colours[1]);
+         sv.writeInt(colours[2]);
+         sv.writeInt(colours[3]);
 
+      } catch (IOException e) {
+         System.out.println("Dmgcpu.saveState\\GameboyPalette.saveData: Could not write to file " + directory);
+         System.out.println("Error Message: " + e.getMessage());
+         System.exit(-1);
+      }
+   }
 
- /** Set the palette from the internal Gameboy Color format */
- public void setGbcColours(int entryNo, boolean high, int dat) {
-  if (high) {
-   gbcData[entryNo] = (gbcData[entryNo] & 0x00FF) | (dat << 8);
+   public void loadData(DataInputStream sv, String directory) {
+      try {
+         data[0] = sv.readShort();
+         data[1] = sv.readShort();
+         data[2] = sv.readShort();
+         data[3] = sv.readShort();
 
-  } else {
-   gbcData[entryNo] = (gbcData[entryNo] & 0xFF00) | dat;
+         gbcData[0] = sv.readInt();
+         gbcData[1] = sv.readInt();
+         gbcData[2] = sv.readInt();
+         gbcData[3] = sv.readInt();
 
-  }
+         colours[0] = sv.readInt();
+         colours[1] = sv.readInt();
+         colours[2] = sv.readInt();
+         colours[3] = sv.readInt();
 
-  int red = (gbcData[entryNo] & 0x001F) << 3;
+      } catch (IOException e) {
+         System.out.println("Dmgcpu.loadState\\GameboyPalette.loadData: Could not read file " + directory);
+         System.out.println("Error Message: " + e.getMessage());
+         System.exit(-1);
+      }
+   }
 
-  int green = (gbcData[entryNo] & 0x03E0) >> 2;
+   /** Change the colour mappings */
+   public void setColours(int c1, int c2, int c3, int c4) {
+      colours[0] = c1;
+      colours[1] = c2;
+      colours[2] = c3;
+      colours[3] = c4;
+   }
 
-  int blue = (gbcData[entryNo] & 0x7C00) >> 7;
+   /** Get the palette from the internal Gameboy Color format */
+   public byte getGbcColours(int entryNo, boolean high) {
+      if (high) {
+         return (byte) (gbcData[entryNo] >> 8);
 
+      } else {
+         return (byte) (gbcData[entryNo] & 0x00FF);
 
-  data[0] = 0;
+      }
+   }
 
-  data[1] = 1;
+   /** Set the palette from the internal Gameboy Color format */
+   public void setGbcColours(int entryNo, boolean high, int dat) {
+      if (high) {
+         gbcData[entryNo] = (gbcData[entryNo] & 0x00FF) | (dat << 8);
 
-  data[2] = 2;
+      } else {
+         gbcData[entryNo] = (gbcData[entryNo] & 0xFF00) | dat;
 
-  data[3] = 3;
+      }
 
+      int red = (gbcData[entryNo] & 0x001F) << 3;
 
-  Color c = new Color(red, green, blue);
+      int green = (gbcData[entryNo] & 0x03E0) >> 2;
 
-  colours[entryNo] = c.getRGB();
+      int blue = (gbcData[entryNo] & 0x7C00) >> 7;
 
+      data[0] = 0;
 
-//  System.out.println("Colour " + entryNo + " set to " + red + ", " + green + ", " + blue);
+      data[1] = 1;
 
- }
-  
- /** Set the palette from the internal Gameboy format */
- public void decodePalette(int pal) {
-  data[0] = (short) (pal & 0x03);
-  data[1] = (short) ((pal & 0x0C) >> 2);
-  data[2] = (short) ((pal & 0x30) >> 4);
-  data[3] = (short) ((pal & 0xC0) >> 6);
- }
+      data[2] = 2;
 
- /** Get the RGB colour value for a specific colour entry */ public int getRgbEntry(int e) {
-  return colours[data[e]];
- }
- /** Get the colour number for a specific colour entry */
- public short getEntry(int e) {
-  return data[e];
- }
+      data[3] = 3;
+
+      Color c = new Color(red, green, blue);
+
+      colours[entryNo] = c.getRGB();
+
+      // System.out.println("Colour " + entryNo + " set to " + red + ", " +
+      // green + ", " + blue);
+
+   }
+
+   /** Set the palette from the internal Gameboy format */
+   public void decodePalette(int pal) {
+      data[0] = (short) (pal & 0x03);
+      data[1] = (short) ((pal & 0x0C) >> 2);
+      data[2] = (short) ((pal & 0x30) >> 4);
+      data[3] = (short) ((pal & 0xC0) >> 6);
+   }
+
+   /** Get the RGB colour value for a specific colour entry */
+   public int getRgbEntry(int e) {
+      return colours[data[e]];
+   }
+
+   /** Get the colour number for a specific colour entry */
+   public short getEntry(int e) {
+      return data[e];
+   }
 }

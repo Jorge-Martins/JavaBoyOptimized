@@ -40,6 +40,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.util.StringTokenizer;
+
 import javax.sound.sampled.*;
 
 /** This class represents the game cartridge and contains methods to load the ROM and battery RAM
@@ -120,7 +121,7 @@ class Cartridge {
 
    /** The bank number which is currently mapped at 0x4000 in CPU address space */
    int currentBank = 1;
-
+   
    /**
     * The bank which has been saved when the debugger changes the ROM mapping.
     * The mapping is restored from this register when execution resumes
@@ -133,7 +134,7 @@ class Cartridge {
     */
    int ramBank;
    int ramPageStart;
-
+   
    boolean mbc1LargeRamMode = false;
    boolean ramEnabled, disposed = false;
    Component applet;
@@ -240,9 +241,54 @@ class Cartridge {
          new ModalDialog((Frame) a, "Error", "Loading the ROM image failed.",
                   "The file is not a valid Gameboy ROM.");
       }
-
    }
 
+   public void saveData(DataOutputStream sv, String directory) {
+      try {
+         sv.write(ram);
+         
+         sv.writeInt(pageStart);
+         sv.writeInt(currentBank);
+         sv.writeInt(savedBank);
+         sv.writeInt(ramBank);
+         sv.writeInt(ramPageStart);
+         
+         sv.writeBoolean(mbc1LargeRamMode);
+         sv.writeBoolean(ramEnabled);
+         sv.writeBoolean(disposed);
+         
+      } catch (IOException e) {
+         System.out.println("Dmgcpu.saveState\\Cartridge.saveData: Could not write to file " + directory);
+         System.out.println("Error Message: " + e.getMessage());
+         System.exit(-1);
+      }
+   }
+
+   public void loadData(DataInputStream sv, String directory) {
+      try {
+         int size = ram.length;
+         if(sv.read(ram) != size){
+            System.out.println("Dmgcpu.loadState\\Cartridge.loadData: ram loaded has different size!");
+            System.exit(-1);
+         }
+         
+         pageStart = sv.readInt();
+         currentBank = sv.readInt();
+         savedBank = sv.readInt();
+         ramBank = sv.readInt();
+         ramPageStart = sv.readInt();
+         
+         mbc1LargeRamMode = sv.readBoolean();
+         ramEnabled = sv.readBoolean();
+         disposed = sv.readBoolean();
+         
+      } catch (IOException e) {
+         System.out.println("Dmgcpu.loadState\\Cartridge.loadData: Could not read file " + directory);
+         System.out.println("Error Message: " + e.getMessage());
+         System.exit(-1);
+      }
+   }
+   
    public boolean needsResetEnable() {
       // System.out.println("Reset !");
       if (needsReset) {

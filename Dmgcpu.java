@@ -145,6 +145,10 @@ class Dmgcpu {
    boolean allowGbcFeatures = true;
    int gbcRamBank = 1;
 
+ //time between checkpoints in milliseconds 
+   long checkpointTime = 59000; 
+   
+   long initialTime;
    /**
     * Create a CPU emulator with the supplied cartridge and game link objects.
     * Both can be set up or changed later if needed
@@ -168,17 +172,13 @@ class Dmgcpu {
       }
       ioHandler = new IoHandler(this);
       applet = a;
+      initialTime = System.currentTimeMillis();
       // reset();
    }
 
    // New stuff >>>>> TODO
-   public void saveState(String extension) {
-      String directory = (cartridge.romFileName + extension);
-
+   private void saveData(DataOutputStream sv, String directory) {
       try {
-         FileOutputStream fl = new FileOutputStream(directory);
-         DataOutputStream sv = new DataOutputStream(fl);
-         
          // 8 bit registers
          sv.writeInt(a);
          sv.writeInt(b);
@@ -192,38 +192,80 @@ class Dmgcpu {
          sv.writeInt(pc);
          sv.writeInt(hl);
 
-//         System.out.println("a = " + a + "\n" + "b = " + b +  "\n" + "c = " + c +  "\n" + "d = " + d +
-//                  "\n" + "e = " + e +  "\n" + "f = " + f +  "\n" + "sp = " + sp +  "\n" + "pc = " + pc +
-//                  "\n" + "hl = " + hl);
-         
          // write ram 8Kb
          sv.write(mainRam);
-        
+
          // write oam (used mainly for registers) 256 bytes
          sv.write(oam);
-         
-         // write battery ram
-         sv.write(cartridge.ram);
-         
-         // write videoRam
-         sv.write(graphicsChip.videoRam);
-         
-         // write background
-         graphicsChip.backgroundPalette.saveData(sv, directory);
-         
-         // write first sprite palette
-         graphicsChip.obj1Palette.saveData(sv, directory);
-         
-         // write second sprite palette
-         graphicsChip.obj2Palette.saveData(sv, directory);
-         
-         for(int i = 0; i < 8; i++){
-            graphicsChip.gbcBackground[i].saveData(sv, directory);
-            graphicsChip.gbcSprite[i].saveData(sv, directory);
+
+         // write important variables
+         sv.writeInt(instrCount);
+
+      } catch (IOException e) {
+         System.out.println("Dmgcpu.saveState.saveData: Could not write to file " + directory);
+         System.out.println("Error Message: " + e.getMessage());
+         System.exit(-1);
+      }
+   }
+
+   private void loadData(DataInputStream sv, String directory) {
+      try {
+         int size = 0;
+         // 8 bit registers
+         a = sv.readInt();
+         b = sv.readInt();
+         c = sv.readInt();
+         d = sv.readInt();
+         e = sv.readInt();
+         f = sv.readInt();
+
+         // 16 bit registers
+         sp = sv.readInt();
+         pc = sv.readInt();
+         hl = sv.readInt();
+
+         // write ram 8Kb
+         size = mainRam.length;
+         if(sv.read(mainRam) != size){
+            System.out.println("Dmgcpu.loadState.loadData: mainRam loaded has different size!");
+            System.exit(-1);
+         }
+
+         // write oam (used mainly for registers) 256 bytes
+         size = oam.length;
+         if(sv.read(oam) != size){
+            System.out.println("Dmgcpu.loadState.loadData: oam loaded has different size!");
+            System.exit(-1);
          }
          
-         // writes ioMapping
-         sv.write(ioHandler.registers);
+         // write important variables
+         instrCount = sv.readInt();
+
+      } catch (IOException e) {
+         System.out.println("Dmgcpu.saveState.loadData: Could not read file " + directory);
+         System.out.println("Error Message: " + e.getMessage());
+         System.exit(-1);
+      }
+   }
+   
+   
+   public void saveState(String extension) {
+      String directory = (cartridge.romFileName + extension);
+
+      try {
+         FileOutputStream fl = new FileOutputStream(directory);
+         DataOutputStream sv = new DataOutputStream(fl);
+
+         saveData(sv, directory);
+         
+         // write battery ram
+         cartridge.saveData(sv, directory);
+         
+         // write graphic memory 
+         graphicsChip.saveData(sv, directory);
+         
+         // write io state
+         ioHandler.saveData(sv, directory);
          
          sv.close();
          fl.close();
@@ -231,10 +273,14 @@ class Dmgcpu {
       } catch (FileNotFoundException e) {
          System.out.println("Dmgcpu.saveState: Could not open file " + directory);
          System.out.println("Error Message: " + e.getMessage());
+         System.exit(-1);
       } catch (IOException e) {
          System.out.println("Dmgcpu.saveState: Could not write to file " + directory);
          System.out.println("Error Message: " + e.getMessage());
+         System.exit(-1);
       }
+      
+      System.out.println("Saved stage!");
    }
 
    public void loadState(String extension) {
@@ -244,58 +290,17 @@ class Dmgcpu {
          FileInputStream fl = new FileInputStream(directory);
          DataInputStream sv = new DataInputStream(fl);
          
-         a = sv.readInt();
-         b = sv.readInt();
-         c = sv.readInt();
-         d = sv.readInt();
-         e = sv.readInt();
-         f = sv.readInt();
-         sp = sv.readInt();
-         pc = sv.readInt();
-         hl = sv.readInt();
+         // write cpu data
+         loadData(sv, directory);
          
-//         System.out.println("a = " + a + "\n" + "b = " + b +  "\n" + "c = " + c +  "\n" + "d = " + d +
-//                  "\n" + "e = " + e +  "\n" + "f = " + f +  "\n" + "sp = " + sp +  "\n" + "pc = " + pc +
-//                  "\n" + "hl = " + hl);
-         
-         // write ram 8Kb 
-         if(sv.read(mainRam) != mainRam.length){
-            System.out.println("Dmgcpu.loadState: RAM loaded has different size mainRam");
-         }
-         
-         // write oam (used mainly for registers) 256 bytes  
-         if(sv.read(oam) != oam.length){
-            System.out.println("Dmgcpu.loadState: oam loaded has different size oam");
-         }
-
          // write battery ram
-         if(sv.read(cartridge.ram) != cartridge.ram.length){
-            System.out.println("Dmgcpu.loadState: batteryRam loaded has different size batteryRam");
-         }
+         cartridge.loadData(sv, directory);
          
-         // write videoRam
-         if(sv.read(graphicsChip.videoRam) != graphicsChip.videoRam.length){
-            System.out.println("Dmgcpu.loadState: videoRam loaded has different size videoRam");
-         }
+         // write graphic memory 
+         graphicsChip.loadData(sv, directory);
          
-         // write background
-         graphicsChip.backgroundPalette.loadData(sv, directory);
-         
-         // write first sprite palette
-         graphicsChip.obj1Palette.loadData(sv, directory);
-         
-         // write second sprite palette
-         graphicsChip.obj2Palette.loadData(sv, directory);
-         
-         for(int i = 0; i < 8; i++){
-            graphicsChip.gbcBackground[i].loadData(sv, directory);
-            graphicsChip.gbcSprite[i].loadData(sv, directory);
-         }
-         
-         // writes ioMapping
-         if(sv.read(ioHandler.registers) != ioHandler.registers.length){
-            System.out.println("Dmgcpu.loadState: ioRegs loaded has different size ioRegs");
-         }
+         // writes io state
+         ioHandler.loadData(sv, directory);
          
          sv.close();
          fl.close();
@@ -303,10 +308,14 @@ class Dmgcpu {
       } catch (FileNotFoundException ex) {
          System.out.println("Dmgcpu.loadState: Could not open file " + directory);
          System.out.println("Error Message: " + ex.getMessage());
+         System.exit(-1);
       } catch (IOException ex) {
          System.out.println("Dmgcpu.loadState: Could not read file " + directory);
          System.out.println("Error Message: " + ex.getMessage());
+         System.exit(-1);
       } 
+      
+      System.out.println("Loaded stage!");
    }
    // <<<<<<<<<<<<<<<<
 
@@ -846,16 +855,22 @@ class Dmgcpu {
     * forever
     */
    public final void execute(int numInstr) {
-
       terminate = false;
       short newf;
       int dat;
       running = true;
       graphicsChip.startTime = System.currentTimeMillis();
       int b1, b2, b3, offset;
-
+      
+      long t;
       for (int r = 0; (r != numInstr) && (!terminate); r++) {
-
+         t = System.currentTimeMillis();
+         
+         if((t - initialTime) > checkpointTime){
+            initialTime = t;
+            saveState(".cksv");
+         }
+         
          /*
           * GameBoyScreen j = (GameBoyScreen) applet; if
           * (j.viewFrameCounter.getState()) { System.out.print(" " +
