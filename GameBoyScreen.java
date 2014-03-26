@@ -459,10 +459,10 @@ class GameBoyScreen extends Frame implements ActionListener, ComponentListener, 
             applet.dmgcpu.soundChip.setVolume(-10.0F);
          }
          if(soundVolume50.getState()){
-            applet.dmgcpu.soundChip.setVolume(-25.0F);
+            applet.dmgcpu.soundChip.setVolume(-20.0F);
          }
          if(soundVolume25.getState()){
-            applet.dmgcpu.soundChip.setVolume(-40.0F);
+            applet.dmgcpu.soundChip.setVolume(-35.0F);
          }
          if(soundVolume0.getState()){
             applet.dmgcpu.soundChip.setVolume(-80.0F);

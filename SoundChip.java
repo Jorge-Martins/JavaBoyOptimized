@@ -110,7 +110,7 @@ class SoundChip {
             FloatControl volume = (FloatControl) soundLine
                      .getControl(FloatControl.Type.MASTER_GAIN);
             volume.setValue(vol);
-            System.out.println("Volume is now " + volume.getValue());
+            
             if (vol > -70) {
                soundEnabled = true;
             } else {
