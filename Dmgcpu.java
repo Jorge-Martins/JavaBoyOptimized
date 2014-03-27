@@ -180,26 +180,25 @@ class Dmgcpu {
    private void saveData(DataOutputStream sv, String directory) {
       try {
          // 8 bit registers
-         sv.writeInt(a);
-         sv.writeInt(b);
-         sv.writeInt(c);
-         sv.writeInt(d);
-         sv.writeInt(e);
-         sv.writeInt(f);
+         sv.write(a);
+         sv.write(b);
+         sv.write(c);
+         sv.write(d);
+         sv.write(e);
+         sv.write(f);
 
          // 16 bit registers
          sv.writeInt(sp);
          sv.writeInt(pc);
          sv.writeInt(hl);
+         
+         sv.writeInt(gbcRamBank);
 
          // write ram 8Kb
          sv.write(mainRam);
 
          // write oam (used mainly for registers) 256 bytes
          sv.write(oam);
-
-         // write important variables
-         sv.writeInt(instrCount);
 
       } catch (IOException e) {
          System.out.println("Dmgcpu.saveState.saveData: Could not write to file " + directory);
@@ -212,17 +211,19 @@ class Dmgcpu {
       try {
          int size = 0;
          // 8 bit registers
-         a = sv.readInt();
-         b = sv.readInt();
-         c = sv.readInt();
-         d = sv.readInt();
-         e = sv.readInt();
-         f = sv.readInt();
+         a = sv.read();
+         b = sv.read();
+         c = sv.read();
+         d = sv.read();
+         e = sv.read();
+         f = sv.read();
 
          // 16 bit registers
          sp = sv.readInt();
          pc = sv.readInt();
          hl = sv.readInt();
+         
+         gbcRamBank = sv.readInt();
 
          // write ram 8Kb
          size = mainRam.length;
@@ -238,9 +239,6 @@ class Dmgcpu {
             System.exit(-1);
          }
          
-         // write important variables
-         instrCount = sv.readInt();
-
       } catch (IOException e) {
          System.out.println("Dmgcpu.saveState.loadData: Could not read file " + directory);
          System.out.println("Error Message: " + e.getMessage());
@@ -255,7 +253,7 @@ class Dmgcpu {
       try {
          FileOutputStream fl = new FileOutputStream(directory);
          DataOutputStream sv = new DataOutputStream(fl);
-
+         
          saveData(sv, directory);
          
          // write battery ram
@@ -287,6 +285,8 @@ class Dmgcpu {
       String directory = cartridge.romFileName + extension;
 
       try {
+         reset();
+         
          FileInputStream fl = new FileInputStream(directory);
          DataInputStream sv = new DataInputStream(fl);
          
