@@ -138,6 +138,8 @@ class Dmgcpu {
    GameLink gameLink;
    IoHandler ioHandler;
    Component applet;
+   InstructionManager instructionManager;
+   
    boolean terminate;
    boolean running = false;
 
@@ -173,6 +175,7 @@ class Dmgcpu {
       ioHandler = new IoHandler(this);
       applet = a;
       initialTime = System.currentTimeMillis();
+      instructionManager = new InstructionManager(this);
       // reset();
    }
 
@@ -888,7 +891,8 @@ class Dmgcpu {
 
          switch (b1) {
             case 0x00: // NOP
-               pc++;
+//               pc++;
+               instructionManager.execute(b1, b2, b3);
                break;
             case 0x01: // LD BC, nn
                pc += 3;
@@ -950,8 +954,9 @@ class Dmgcpu {
                }
                break;
             case 0x06: // LD B, nn
-               pc += 2;
-               b = b2;
+//               pc += 2;
+//               b = b2;
+               instructionManager.execute(b1, b2, b3);
                break;
             case 0x07: // RLC A
                pc++;
@@ -1038,8 +1043,9 @@ class Dmgcpu {
                }
                break;
             case 0x0E: // LD C, nn
-               pc += 2;
-               c = b2;
+//               pc += 2;
+//               c = b2;
+               instructionManager.execute(b1, b2, b3);
                break;
             case 0x0F: // RRC A
                pc++;
@@ -1137,8 +1143,9 @@ class Dmgcpu {
                }
                break;
             case 0x16: // LD D, nn
-               pc += 2;
-               d = b2;
+//               pc += 2;
+//               d = b2;
+               instructionManager.execute(b1, b2, b3);
                break;
             case 0x17: // RL A
                pc++;
@@ -1227,8 +1234,9 @@ class Dmgcpu {
                }
                break;
             case 0x1E: // LD E, nn
-               pc += 2;
-               e = b2;
+//               pc += 2;
+//               e = b2;
+               instructionManager.execute(b1, b2, b3);
                break;
             case 0x1F: // RR A
                pc++;
