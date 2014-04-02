@@ -9,7 +9,11 @@ public class LD_R extends Instruction{
    
    @Override
    public void execute(int b2, int b3){
+      loadRegisters();
+      
       dmgcpu.pc += 2;
-      writeReg(reg, b2);
+      dmgcpu.registers[reg] = b2;
+      
+      storeRegisters();
    }
 }

@@ -24,23 +24,23 @@ Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 import java.awt.*;
-//import java.awt.image.*;
-//import java.lang.*;
+import java.awt.image.*;
+import java.lang.*;
 import java.io.*;
-//import java.applet.*;
-//import java.net.*;
-//import java.awt.event.KeyListener;
-//import java.awt.event.WindowListener;
-//import java.awt.event.ActionListener;
-//import java.awt.event.ComponentListener;
-//import java.awt.event.ItemListener;
-//import java.awt.event.KeyEvent;
-//import java.awt.event.WindowEvent;
-//import java.awt.event.ActionEvent;
-//import java.awt.event.ComponentEvent;
-//import java.awt.event.ItemEvent;
+import java.applet.*;
+import java.net.*;
+import java.awt.event.KeyListener;
+import java.awt.event.WindowListener;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentListener;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ItemEvent;
 import java.util.*;
-//import javax.sound.sampled.*;
+import javax.sound.sampled.*;
 
 /** This is the main controlling class for the emulation
  *  It contains the code to emulate the Z80-like processor
@@ -50,7 +50,10 @@ import java.util.*;
  */
 class Dmgcpu {
    /** Registers: 8-bit */
+   
    int a, b, c, d, e, f;
+   int[] registers = new int[5];
+   
    /** Registers: 16-bit */
    public int sp, pc, hl;
 
@@ -60,6 +63,10 @@ class Dmgcpu {
    int instrCount = 0;
 
    boolean interruptsEnabled = false;
+   boolean saveInterrupt = false;
+   boolean loadStateInterrupt = false;
+   boolean saveCheckpointInterrupt = false;
+   boolean loadCheckpointInterrupt = false;
 
    /** Used to implement the IE delay slot */
    int ieDelay = -1;
@@ -239,6 +246,11 @@ class Dmgcpu {
             System.out.println("Dmgcpu.loadState.loadData: oam loaded has different size!");
             System.exit(-1);
          }
+         
+         saveInterrupt = false;
+         loadStateInterrupt = false;
+         saveCheckpointInterrupt = false;
+         loadCheckpointInterrupt = false;
          
       } catch (IOException e) {
          System.out.println("Dmgcpu.saveState.loadData: Could not read file " + directory);
@@ -876,7 +888,7 @@ class Dmgcpu {
          
          if((t - initialTime) > checkpointTime){
             initialTime = t;
-            saveState(".cksv");
+            saveCheckpointInterrupt = true;
          }
          
          /*
@@ -900,12 +912,8 @@ class Dmgcpu {
 //         } else{
 //            map.put(b1, 1);
 //         }
-
+            
             switch (b1) {
-               case 0x02: // LD (BC), A
-                  pc++;
-                  addressWrite((b << 8) | c, a);
-                  break;
                case 0x07: // RLC A
                   pc++;
                   f = 0;
@@ -936,10 +944,6 @@ class Dmgcpu {
                      f = (short) ((f & (F_SUBTRACT + F_ZERO + F_HALFCARRY)));
                   }
                   break;
-               case 0x0A: // LD A, (BC)
-                  pc++;
-                  a = JavaBoy.unsign(addressRead((b << 8) + c));
-                  break;
                case 0x0B: // DEC BC
                   pc++;
                   c--;
@@ -965,31 +969,6 @@ class Dmgcpu {
                   if (a == 0) {
                      f |= F_ZERO;
                   }
-                  break;
-               case 0x10: // STOP
-                  pc += 2;
-
-                  if (gbcFeatures) {
-                     if ((ioHandler.registers[0x4D] & 0x01) == 1) {
-                        int newKey1Reg = ioHandler.registers[0x4D] & 0xFE;
-                        if ((newKey1Reg & 0x80) == 0x80) {
-                           setDoubleSpeedCpu(false);
-                           newKey1Reg &= 0x7F;
-                        } else {
-                           setDoubleSpeedCpu(true);
-                           newKey1Reg |= 0x80;
-                           // System.out.println("CAUTION: Game uses double speed CPU, humoungus PC required!");
-                        }
-                        ioHandler.registers[0x4D] = (byte) newKey1Reg;
-                     }
-                  }
-
-                  // terminate = true;
-                  // System.out.println("- Breakpoint reached");
-                  break;
-               case 0x12: // LD (DE), A
-                  pc++;
-                  addressWrite((d << 8) + e, a);
                   break;
                case 0x17: // RL A
                   pc++;
@@ -1022,10 +1001,6 @@ class Dmgcpu {
                   } else {
                      f = (short) ((f & (F_SUBTRACT + F_ZERO + F_HALFCARRY)));
                   }
-                  break;
-               case 0x1A: // LD A, (DE)
-                  pc++;
-                  a = JavaBoy.unsign(addressRead((d << 8) + e));
                   break;
                case 0x1B: // DEC DE
                   pc++;
@@ -1203,9 +1178,7 @@ class Dmgcpu {
                            a += 0x9A;
                            newf |= F_CARRY;
                         }
-
                      }
-
                   }
 
                   a &= 0x00FF;
@@ -1948,10 +1921,6 @@ class Dmgcpu {
                   a = JavaBoy.unsign(addressRead(sp + 1));
                   sp += 2;
                   break;
-               case 0xF2: // LD A, (FF00 + C)
-                  pc++;
-                  a = JavaBoy.unsign(addressRead(0xFF00 + c));
-                  break;
                case 0xF3: // DI
                   pc++;
                   interruptsEnabled = false;
@@ -1994,10 +1963,10 @@ class Dmgcpu {
                   pc++;
                   sp = hl;
                   break;
-               case 0xFA: // LD A, (nnnn)
-                  pc += 3;
-                  a = JavaBoy.unsign(addressRead((b3 << 8) + b2));
-                  break;
+//               case 0xFA: // LD A, (nnnn)
+//                  pc += 3;
+//                  a = JavaBoy.unsign(addressRead((b3 << 8) + b2));
+//                  break;
                case 0xFB: // EI
                   pc++;
                   ieDelay = 1;
@@ -2135,8 +2104,8 @@ class Dmgcpu {
                      break;
                   }
             }
-            
          }
+         
          if (ieDelay != -1) {
 
             if (ieDelay > 0) {
@@ -2161,6 +2130,22 @@ class Dmgcpu {
           * System.out.println("Overflow in HL!"); }
           */
 
+         if(saveInterrupt){
+            saveState(".stsv");
+            saveInterrupt = false;
+         }
+         if(loadStateInterrupt){
+            loadState(".stsv");
+            loadStateInterrupt = false;
+         }
+         if(saveCheckpointInterrupt){
+            saveState(".cksv");
+            saveCheckpointInterrupt = false;
+         }
+         if(loadCheckpointInterrupt){
+            loadState(".cksv");
+            loadCheckpointInterrupt = false;
+         }
       }
       running = false;
       terminate = false;

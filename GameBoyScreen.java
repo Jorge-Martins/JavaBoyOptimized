@@ -638,15 +638,15 @@ class GameBoyScreen extends Frame implements ActionListener, ComponentListener, 
          //New Stuff TODO>>>>>
       } else if (command.equals("Save State")){
          if (applet.dmgcpu != null) {
-            applet.dmgcpu.saveState(".stsv");
+            applet.dmgcpu.saveInterrupt = true;
          }
       } else if (command.equals("Load State")){
          if (applet.dmgcpu != null) {
-            applet.dmgcpu.loadState(".stsv");
+            applet.dmgcpu.loadStateInterrupt = true;
          }
       } else if (command.equals("Load Checkpoint")){
          if (applet.dmgcpu != null) {
-            applet.dmgcpu.loadState(".cksv");
+            applet.dmgcpu.loadCheckpointInterrupt = true;
          }
       }
    }

@@ -10,22 +10,26 @@ public class INC_R extends Instruction{
          
    @Override
    public void execute(int b2, int b3){
+      loadRegisters();
+      
       dmgcpu.pc++;
       dmgcpu.f &= dmgcpu.F_CARRY;
       
-      switch (readReg(reg)) {
+      switch (dmgcpu.registers[reg]) {
          case 0xFF:
             dmgcpu.f |= dmgcpu.F_HALFCARRY + dmgcpu.F_ZERO;
-            writeReg(reg, 0x00);
+            dmgcpu.registers[reg] = 0x00;
             break;
          case 0x0F:
             dmgcpu.f |= dmgcpu.F_HALFCARRY;
-            writeReg(reg, 0x10);
+            dmgcpu.registers[reg] = 0x10;
             break;
          default:
-            incReg(reg, 1);
+            dmgcpu.registers[reg]++;
             break;
    
       }
+      
+      storeRegisters();
    }
 }

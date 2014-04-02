@@ -10,8 +10,12 @@ public class LD_2R extends Instruction{
    
    @Override
    public void execute(int b2, int b3){
+      loadRegisters();
+      
       dmgcpu.pc += 3;
-      writeReg(reg1, b3);
-      writeReg(reg2, b2);
+      dmgcpu.registers[reg1] = b3;
+      dmgcpu.registers[reg2] = b2;
+      
+      storeRegisters();
    }
 }

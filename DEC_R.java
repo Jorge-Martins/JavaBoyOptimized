@@ -10,27 +10,31 @@ public class DEC_R extends Instruction{
          
    @Override
    public void execute(int b2, int b3){
+      loadRegisters();
+      
       dmgcpu.pc++;
       dmgcpu.f &= dmgcpu.F_CARRY;
       dmgcpu.f |= dmgcpu.F_SUBTRACT;
       
-      switch (readReg(reg)) {
+      switch (dmgcpu.registers[reg]) {
          case 0x00:
             dmgcpu.f |= dmgcpu.F_HALFCARRY;
-            writeReg(reg, 0xFF);
+            dmgcpu.registers[reg] = 0xFF;
             break;
          case 0x10:
             dmgcpu.f |= dmgcpu.F_HALFCARRY;
-            writeReg(reg, 0x0F);
+            dmgcpu.registers[reg] = 0x0F;
             break;
          case 0x01:
             dmgcpu.f |= dmgcpu.F_ZERO;
-            writeReg(reg, 0x00);
+            dmgcpu.registers[reg] = 0x00;
             break;
          default:
-            incReg(reg, -1);
+            dmgcpu.registers[reg]--;
             break;
    
       }
+      
+      storeRegisters();
    }
 }

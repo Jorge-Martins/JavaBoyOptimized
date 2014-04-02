@@ -11,16 +11,20 @@ public class INC_2R extends Instruction{
    
    @Override
    public void execute(int b2, int b3){
-      dmgcpu.pc++;
-      incReg(reg2, 1);
+      loadRegisters();
       
-      if(readReg(reg2) == value){
-         incReg(reg1, 1);
-         writeReg(reg2, 0);
+      dmgcpu.pc++;
+      dmgcpu.registers[reg2]++;
+      
+      if(dmgcpu.registers[reg2] == value){
+         dmgcpu.registers[reg1]++;
+         dmgcpu.registers[reg2] = 0;
          
-         if(readReg(reg1) == value){
-            writeReg(reg1, 0);
+         if(dmgcpu.registers[reg1] == value){
+            dmgcpu.registers[reg1] = 0;
          }
       }
+      
+      storeRegisters();
    }
 }
