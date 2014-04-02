@@ -935,16 +935,6 @@ class Dmgcpu {
                   addressWrite((b3 << 8) + b2 + 1, (sp & 0xFF00) >> 8);
                   addressWrite((b3 << 8) + b2, (sp & 0x00FF));
                   break;
-               case 0x09: // ADD HL, BC
-                  pc++;
-                  hl = (hl + ((b << 8) + c));
-                  if ((hl & 0xFFFF0000) != 0) {
-                     f = (short) ((f & (F_SUBTRACT + F_ZERO + F_HALFCARRY)) | (F_CARRY));
-                     hl &= 0xFFFF;
-                  } else {
-                     f = (short) ((f & (F_SUBTRACT + F_ZERO + F_HALFCARRY)));
-                  }
-                  break;
                case 0x0B: // DEC BC
                   pc++;
                   c--;
@@ -992,16 +982,6 @@ class Dmgcpu {
                   break;
                case 0x18: // JR nn
                   pc += 2 + offset;
-                  break;
-               case 0x19: // ADD HL, DE
-                  pc++;
-                  hl = (hl + ((d << 8) + e));
-                  if ((hl & 0xFFFF0000) != 0) {
-                     f = (short) ((f & (F_SUBTRACT + F_ZERO + F_HALFCARRY)) | (F_CARRY));
-                     hl &= 0xFFFF;
-                  } else {
-                     f = (short) ((f & (F_SUBTRACT + F_ZERO + F_HALFCARRY)));
-                  }
                   break;
                case 0x1B: // DEC DE
                   pc++;
@@ -1196,16 +1176,6 @@ class Dmgcpu {
                      pc += 2;
                   }
                   break;
-               case 0x29: // ADD HL, HL
-                  pc++;
-                  hl = (hl + hl);
-                  if ((hl & 0xFFFF0000) != 0) {
-                     f = (short) ((f & (F_SUBTRACT + F_ZERO + F_HALFCARRY)) | (F_CARRY));
-                     hl &= 0xFFFF;
-                  } else {
-                     f = (short) ((f & (F_SUBTRACT + F_ZERO + F_HALFCARRY)));
-                  }
-                  break;
                case 0x2A: // LDI A, (HL)
                   pc++;
                   a = JavaBoy.unsign(addressRead(hl));
@@ -1347,16 +1317,6 @@ class Dmgcpu {
                      pc += 2 + offset;
                   } else {
                      pc += 2;
-                  }
-                  break;
-               case 0x39: // ADD HL, SP ** Could be wrong **
-                  pc++;
-                  hl = (hl + sp);
-                  if ((hl & 0xFFFF0000) != 0) {
-                     f = (short) ((f & (F_SUBTRACT + F_ZERO + F_HALFCARRY)) | (F_CARRY));
-                     hl &= 0xFFFF;
-                  } else {
-                     f = (short) ((f & (F_SUBTRACT + F_ZERO + F_HALFCARRY)));
                   }
                   break;
                case 0x3A: // LD A, (HL-)

@@ -885,7 +885,7 @@ class GameBoyScreen extends Frame implements ActionListener, ComponentListener, 
             g.setColor(new Color(255, 255, 255));
             g.fillRect(0, d.height - 20, d.width, 20);
             g.setColor(new Color(0, 0, 0));
-            g.drawString(graphicsChip.getFPS() + " frames per second", 10, d.height - 7);
+            g.drawString(graphicsChip.getFPS() + " fps", 10, d.height - 7);
          }
       }
    }

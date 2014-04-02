@@ -1,14 +1,14 @@
 /*
  * this class emulates 2 instructions
- *  type 0 -> LD (BC), A 
- *  type 1 -> LD (DE), A
+ *  type bc -> LD (BC), A 
+ *  type de -> LD (DE), A
  * 
  *
  */
 public class LD_RR_A extends Instruction{
-   private int type;
+   private String type;
    
-   public LD_RR_A(int type, Dmgcpu dmgcpu){
+   public LD_RR_A(String type, Dmgcpu dmgcpu){
       this.dmgcpu = dmgcpu;
       this.type = type;
    }
@@ -19,7 +19,7 @@ public class LD_RR_A extends Instruction{
       loadRegisters();
       
       dmgcpu.pc++;
-      if(type == 0){
+      if(type.equals("bc")){
          dmgcpu.addressWrite((dmgcpu.b << 8) | dmgcpu.c, dmgcpu.a);
       } else{
          dmgcpu.addressWrite((dmgcpu.d << 8) + dmgcpu.e, dmgcpu.a);

@@ -11,20 +11,24 @@ public class InstructionManager {
       
       instructionMap.put(0x00, new NOP(dmgcpu));
       instructionMap.put(0x01, new LD_2R(b, c, dmgcpu));
-      instructionMap.put(0x02, new LD_RR_A(0, dmgcpu));
+      instructionMap.put(0x02, new LD_RR_A("bc", dmgcpu));
       instructionMap.put(0x03, new INC_2R(b, c, dmgcpu));
       instructionMap.put(0x04, new INC_R(b, dmgcpu));
       instructionMap.put(0x05, new DEC_R(b, dmgcpu));
+      instructionMap.put(0x09, new ADD(b, c, dmgcpu));
       instructionMap.put(0x0C, new INC_R(c, dmgcpu));
       instructionMap.put(0x0D, new DEC_R(c, dmgcpu));
       instructionMap.put(0x10, new STOP(dmgcpu));
       instructionMap.put(0x11, new LD_2R(d, e, dmgcpu));
-      instructionMap.put(0x12, new LD_RR_A(1, dmgcpu));
+      instructionMap.put(0x12, new LD_RR_A("de", dmgcpu));
       instructionMap.put(0x13, new INC_2R(d, e, dmgcpu));
       instructionMap.put(0x14, new INC_R(d, dmgcpu));
       instructionMap.put(0x15, new DEC_R(d, dmgcpu));
+      instructionMap.put(0x19, new ADD(d, e, dmgcpu));
       instructionMap.put(0x1C, new INC_R(e, dmgcpu));
       instructionMap.put(0x1D, new DEC_R(e, dmgcpu));
+      instructionMap.put(0x29, new ADD("hl", dmgcpu));
+      instructionMap.put(0x39, new ADD("sp", dmgcpu));
       instructionMap.put(0x3C, new INC_R(a, dmgcpu));
       instructionMap.put(0x3E, new LD_R(a, dmgcpu));
       instructionMap.put(0x06, new LD_R(b, dmgcpu));
