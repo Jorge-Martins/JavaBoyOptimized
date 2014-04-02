@@ -4,6 +4,7 @@ public class InstructionManager {
    private int a = 0, b = 1, c = 2, d= 3, e = 4;
    private Dmgcpu dmgcpu;
    private Map<Integer, Instruction> instructionMap;
+   private ALU alu;
    
    private void init(){
       instructionMap = new HashMap<Integer, Instruction>();
@@ -39,6 +40,7 @@ public class InstructionManager {
    
    public InstructionManager(Dmgcpu dmgcpu){
       this.dmgcpu = dmgcpu;
+      alu = new ALU(dmgcpu);
       init();
    }
    
@@ -51,5 +53,9 @@ public class InstructionManager {
       }
       
       return false;
+   }
+   
+   public boolean execute(int b1){
+      return alu.execute(b1);
    }
 }

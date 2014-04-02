@@ -40,6 +40,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.util.*;
+
 import javax.sound.sampled.*;
 
 /** This is the main controlling class for the emulation
@@ -1963,10 +1964,6 @@ class Dmgcpu {
                   pc++;
                   sp = hl;
                   break;
-//               case 0xFA: // LD A, (nnnn)
-//                  pc += 3;
-//                  a = JavaBoy.unsign(addressRead((b3 << 8) + b2));
-//                  break;
                case 0xFB: // EI
                   pc++;
                   ieDelay = 1;
@@ -1995,101 +1992,8 @@ class Dmgcpu {
                default:
 
                   if ((b1 & 0xC0) == 0x80) { // Byte 0x10?????? indicates ALU op
-                     pc++;
-                     int operand = registerRead(b1 & 0x07);
-                     switch ((b1 & 0x38) >> 3) {
-                        case 1: // ADC A, r
-                           if ((f & F_CARRY) != 0) {
-                              operand++;
-                           }
-                           // Note! No break!
-                        case 0: // ADD A, r
-
-                           f = 0;
-
-                           if ((((a & 0x0F) + (operand & 0x0F)) & 0xF0) != 0x00) {
-                              f |= F_HALFCARRY;
-                           }
-
-                           a += operand;
-
-                           if (a == 0) {
-                              f |= F_ZERO;
-                           }
-
-                           if ((a & 0xFF00) != 0) { // Perform 8-bit overflow
-                                                    // and
-                                                    // set zero flag
-                              if (a == 0x0100) {
-                                 f |= F_ZERO + F_CARRY + F_HALFCARRY;
-                                 a = 0;
-                              } else {
-                                 f |= F_CARRY + F_HALFCARRY;
-                                 a &= 0x00FF;
-                              }
-                           }
-                           break;
-                        case 3: // SBC A, r
-                           if ((f & F_CARRY) != 0) {
-                              operand++;
-                           }
-                           // Note! No break!
-                        case 2: // SUB A, r
-
-                           f = F_SUBTRACT;
-
-                           if ((((a & 0x0F) - (operand & 0x0F)) & 0xFFF0) != 0x00) {
-                              f |= F_HALFCARRY;
-                           }
-
-                           a -= operand;
-
-                           if ((a & 0xFF00) != 0) {
-                              a &= 0x00FF;
-                              f |= F_CARRY;
-                           }
-                           if (a == 0) {
-                              f |= F_ZERO;
-                           }
-
-                           break;
-                        case 4: // AND A, r
-                           a &= operand;
-                           if (a == 0) {
-                              f = F_ZERO;
-                           } else {
-                              f = 0;
-                           }
-                           break;
-                        case 5: // XOR A, r
-                           a ^= operand;
-                           if (a == 0) {
-                              f = F_ZERO;
-                           } else {
-                              f = 0;
-                           }
-                           break;
-                        case 6: // OR A, r
-                           a |= operand;
-                           if (a == 0) {
-                              f = F_ZERO;
-                           } else {
-                              f = 0;
-                           }
-                           break;
-                        case 7: // CP A, r (compare)
-                           f = F_SUBTRACT;
-                           if (a == operand) {
-                              f |= F_ZERO;
-                           }
-                           if (a < operand) {
-                              f |= F_CARRY;
-                           }
-                           if ((a & 0x0F) < (operand & 0x0F)) {
-                              f |= F_HALFCARRY;
-                           }
-                           break;
-                     }
+                    instructionManager.execute(b1);
+                    
                   } else if ((b1 & 0xC0) == 0x40) { // Byte 0x01xxxxxxx
                                                     // indicates
                                                     // 8-bit ld
