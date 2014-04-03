@@ -18,5 +18,5 @@ public abstract class Instruction {
       dmgcpu.e = dmgcpu.registers[4];
    }
    
-   public abstract void execute(int b2, int b3);
+   public abstract void execute(int b2, int b3, int offset);
 }

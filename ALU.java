@@ -7,14 +7,14 @@ public class ALU{
    public ALU(Dmgcpu dmgcpu){
       this.dmgcpu = dmgcpu;
       
-      map.put(0, new ADD_A(dmgcpu));
-      map.put(1, new ADC_A(dmgcpu));
-      map.put(2, new SUB_A(dmgcpu));
-      map.put(3, new SBC_A(dmgcpu));
-      map.put(4, new AND_A(dmgcpu));
-      map.put(5, new XOR_A(dmgcpu));
-      map.put(6, new OR_A(dmgcpu));
-      map.put(7, new CP_A(dmgcpu));
+      map.put(0, new ADD_A(dmgcpu));      // ADD A, r
+      map.put(1, new ADC_A(dmgcpu));      // ADC A, r
+      map.put(2, new SUB_A(dmgcpu));      // SUB A, r
+      map.put(3, new SBC_A(dmgcpu));      // SBC A, r
+      map.put(4, new AND_A(dmgcpu));      // AND A, r
+      map.put(5, new XOR_A(dmgcpu));      // XOR A, r
+      map.put(6, new OR_A(dmgcpu));       // OR A, r
+      map.put(7, new CP_A(dmgcpu));       // CP A, r (compare)
    }
    
    public boolean execute(int b1){

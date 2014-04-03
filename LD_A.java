@@ -29,7 +29,7 @@ public class LD_A extends Instruction{
    }
    
    @Override
-   public void execute(int b2, int b3){
+   public void execute(int b2, int b3, int offset){
       setAddress();
       dmgcpu.pc++;
       dmgcpu.a = JavaBoy.unsign(dmgcpu.addressRead(address));

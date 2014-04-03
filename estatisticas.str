@@ -1,0 +1,119 @@
+0       252001  NOP				done
+1       18569   LD BC,nn		done
+3       30210   INC BC			done
+5       8860    DEC B			done
+6       166873  LD B,n			done
+9       299478  ADD HL,BC       done
+10      30242   LD A,(BC)		done
+11      26495   DEC BC			done
+12      54759   INC C			done
+13      119505  DEC C			done
+14      25782   LD C,n			done
+17      58696   STOP			done
+18      278004  LD DE,nn		done
+19      46826   LD (DE),A
+20      12104   INC DE			done
+21      36664   INC D			done
+22      132726  DEC D			done
+24      49905   LD D,n
+25      241689  RL A
+26      299952  JR n
+27      84004   ADD HL,DE       done
+28      441963  LD A,(DE)		done
+29      8597    DEC DE			done
+32      1221595 DEC E			done
+33      384815  LD E,n			done
+34      72921   RR A
+35      244029  JR NZ,n
+38      53942   LDI (HL),A
+40      599828  INC HL
+42      150827  DEC H
+44      93276   DAA
+47      13583   JR Z,n
+48      122632  ADD HL,HL		done
+50      9064    DEC HL
+53      9336    DEC L
+54      18144   LD L,n
+55      24243   CPL
+56      109335  JR NC,n
+60      82330   LDD (HL),A
+61      433297  INC SP
+62      199385  INC (HL)
+70      15910   ADD HL,SP		done
+71      64993   LDD A,(HL)
+79      101968  LD A,n			done
+84      56197   LD B,C
+87      46329   LD B,E
+93      10829   LD B,H
+95      245540  LD B,(HL)
+98      12130   LD C,B
+102     21254   LD C,C
+103     11338   LD C,D
+107     12132   LD C,L
+111     163560  LD C,A
+112     193633  LD D,B
+113     9072    LD D,C
+114     46990   LD D,D
+115     43527   LD D,E
+118     16790   LD D,H
+119     31268   LD D,L
+120     77494   LD D,(HL)
+121     123436  LD D,A
+122     146440  LD E,B
+123     36471   LD E,C
+124     9144    LD E,D
+125     70531   LD E,E
+126     328689  LD E,H
+128     15527   LD E,L
+129     12125   LD E,(HL)
+130     12751   LD E,A
+131     39534   LD H,B
+133     18388   LD H,C
+134     157410  LD H,D
+135     63233   LD H,E
+136     6895    LD H,H
+144     9070    LD H,(HL)
+152     6889    LD L,D
+160     15783   LD L,H
+163     5275    LD L,(HL)
+167     567880  LD (HL),B
+168     5359    LD (HL),C
+175     59714   LD (HL),D
+176     12465   LD (HL),E
+177     29981   LD (HL),H
+179     84014   HALT
+182     34446   LD (HL),A
+184     67696   LD A,B
+185     9295    LD A,C
+186     12092   LD A,D
+187     51358   LD A,E
+189     193600  LD A,H
+190     45339   LD A,L
+192     42820   LD A,(HL)
+193     92191   LD A,A
+194     183991  ADD A,B
+195     45533   ADD A,C
+197     76191   ADD A,E
+198     354015  ADD A,H
+200     86059   ADD A,L
+201     437558  ADD A,(HL)
+202     268931  ADD A,A
+203     590488  ADC A,B
+205     524200  ADC A,D
+208     12466   ADC A,E
+209     105052  ADC A,H
+213     81516   ADC A,(HL)
+214     48433   ADC A,A
+216     27560   SUB A,B
+217     17871   SUB A,C
+224     641862  SUB A,H
+225     77172   SUB A,L
+229     77125   SUB A,A
+230     240548  SBC A,B
+233     34182   SBC A,C
+234     311582  SBC A,D
+240     907618  SBC A,E
+241     71085   SBC A,H
+245     87173   SBC A,(HL)
+250     371308  AND C
+254     620311  AND E

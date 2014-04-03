@@ -279,13 +279,13 @@ class Dmgcpu {
          // write io state
          ioHandler.saveData(sv, directory);
          
-         int i = 0;
-         for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-            if(entry.getValue() > 5000){
-               System.out.println(entry.getKey() + "\t" + entry.getValue() + "\t" + s[i]);
-            }
-            i++;
-        }
+//         int i = 0;
+//         for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+//            if(entry.getValue() > 5000){
+//               System.out.println(entry.getKey() + "\t" + entry.getValue() + "\t" + s[i]);
+//            }
+//            i++;
+//        }
          sv.close();
          fl.close();
 
@@ -870,7 +870,7 @@ class Dmgcpu {
          }
       }
    }
-   private Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+   //private Map<Integer, Integer> map = new HashMap<Integer, Integer>();
    /**
     * Execute the specified number of Gameboy instructions. Use '-1' to execute
     * forever
@@ -907,7 +907,7 @@ class Dmgcpu {
          b3 = JavaBoy.unsign(addressRead(pc + 2));
          b2 = JavaBoy.unsign((short) offset);
 
-         if(!instructionManager.execute(b1, b2, b3)){
+         if(!instructionManager.execute(b1, b2, b3, offset)){
 //         if(map.containsKey(b1)){
 //            map.put(b1, map.get(b1) + 1);
 //         } else{
@@ -935,17 +935,17 @@ class Dmgcpu {
                   addressWrite((b3 << 8) + b2 + 1, (sp & 0xFF00) >> 8);
                   addressWrite((b3 << 8) + b2, (sp & 0x00FF));
                   break;
-               case 0x0B: // DEC BC
-                  pc++;
-                  c--;
-                  if ((c & 0xFF00) != 0) {
-                     c = 0xFF;
-                     b--;
-                     if ((b & 0xFF00) != 0) {
-                        b = 0xFF;
-                     }
-                  }
-                  break;
+//               case 0x0B: // DEC BC
+//                  pc++;
+//                  c--;
+//                  if ((c & 0xFF00) != 0) {
+//                     c = 0xFF;
+//                     b--;
+//                     if ((b & 0xFF00) != 0) {
+//                        b = 0xFF;
+//                     }
+//                  }
+//                  break;
                case 0x0F: // RRC A
                   pc++;
                   if ((a & 0x01) == 0x01) {
@@ -983,17 +983,17 @@ class Dmgcpu {
                case 0x18: // JR nn
                   pc += 2 + offset;
                   break;
-               case 0x1B: // DEC DE
-                  pc++;
-                  e--;
-                  if ((e & 0xFF00) != 0) {
-                     e = 0xFF;
-                     d--;
-                     if ((d & 0xFF00) != 0) {
-                        d = 0xFF;
-                     }
-                  }
-                  break;
+//               case 0x1B: // DEC DE
+//                  pc++;
+//                  e--;
+//                  if ((e & 0xFF00) != 0) {
+//                     e = 0xFF;
+//                     d--;
+//                     if ((d & 0xFF00) != 0) {
+//                        d = 0xFF;
+//                     }
+//                  }
+//                  break;
                case 0x1F: // RR A
                   pc++;
                   if ((a & 0x01) == 0x01) {
