@@ -8,7 +8,7 @@ public class LD_R extends Instruction{
    }
    
    @Override
-   public void execute(int b2, int b3, int offset){
+   public void execute(int b1, int b2, int b3, int offset){
       loadRegisters();
       
       dmgcpu.pc += 2;

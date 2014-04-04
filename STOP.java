@@ -6,7 +6,7 @@ public class STOP extends Instruction {
    }
    
    @Override
-   public void execute(int b2, int b3, int offset) { 
+   public void execute(int b1, int b2, int b3, int offset) { 
       dmgcpu.pc += 2;
 
       if (dmgcpu.gbcFeatures) {

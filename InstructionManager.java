@@ -4,7 +4,6 @@ public class InstructionManager {
    private int a = 0, b = 1, c = 2, d= 3, e = 4;
    private Dmgcpu dmgcpu;
    private Map<Integer, Instruction> instructionMap;
-   private ALU alu;
    
    private void init(){
       instructionMap = new HashMap<Integer, Instruction>();
@@ -40,20 +39,38 @@ public class InstructionManager {
       instructionMap.put(0x3C, new INC_R(a, dmgcpu));             // INC A
       instructionMap.put(0x3D, new DEC_R(a, dmgcpu));             // DEC A
       instructionMap.put(0x3E, new LD_R(a, dmgcpu));              // LD A, nn
+      
+      // opcode 0x40 - 0x7F -> LD Reg, Reg
+      Instruction ld = new LD(dmgcpu);
+      for(int i = 0x40; i <= 0x7F; i++){
+         //the halt instruction has this opcode 
+         if(i != 0x76){
+            instructionMap.put(i, ld);
+         } else{
+            instructionMap.put(i, new HALT(dmgcpu));
+         }
+         
+      }
+      
+      //          opcode 0x80 - 0xBF -> ALU
+      Instruction alu = new ALU(dmgcpu);
+      for(int i = 0x80; i <= 0xBF; i++){
+         instructionMap.put(i, alu);
+      }
+      instructionMap.put(0xCB, new ExtOps(dmgcpu));               // ExtOps
       instructionMap.put(0xF2, new LD_A(dmgcpu));                 // LD A, (FF00 + C)
       instructionMap.put(0xFA, new LD_A_nn(dmgcpu));              // LD A, (nnnn)
    }
    
    public InstructionManager(Dmgcpu dmgcpu){
       this.dmgcpu = dmgcpu;
-      alu = new ALU(dmgcpu);
       init();
    }
    
    public boolean execute(int b1, int b2, int b3, int offset){
       Instruction i = instructionMap.get(b1);
       if(i != null){    
-         i.execute(b2, b3, offset);
+         i.execute(b1, b2, b3, offset);
          //System.out.println("executed: " + i.toString());
          return true;
       }
@@ -61,7 +78,7 @@ public class InstructionManager {
       return false;
    }
    
-   public boolean execute(int b1){
-      return alu.execute(b1);
-   }
+//   public boolean execute(int b1){
+//      return alu.execute(b1);
+//   }
 }

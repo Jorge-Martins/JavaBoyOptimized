@@ -1,7 +1,6 @@
 import java.util.*;
 
-public class ALU{
-   private Dmgcpu dmgcpu;
+public class ALU extends Instruction{
    private Map<Integer, ALUInstruction> map = new HashMap<Integer, ALUInstruction>();
    
    public ALU(Dmgcpu dmgcpu){
@@ -17,17 +16,16 @@ public class ALU{
       map.put(7, new CP_A(dmgcpu));       // CP A, r (compare)
    }
    
-   public boolean execute(int b1){
+   public void execute(int b1, int b2, int b3, int offset){
       ALUInstruction i = map.get((b1 & 0x38) >> 3);
       
       if(i != null){    
          dmgcpu.pc++;
          i.execute(b1);
          //System.out.println("ALU executed: " + i.toString());
-         return true;
       }
       
-      return false;
+     
    }
 }
 

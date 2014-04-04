@@ -53,6 +53,7 @@ class Dmgcpu {
    /** Registers: 8-bit */
    
    int a, b, c, d, e, f;
+   short newf;
    int[] registers = new int[5];
    
    /** Registers: 16-bit */
@@ -877,7 +878,6 @@ class Dmgcpu {
     */
    public final void execute(int numInstr) {
       terminate = false;
-      short newf;
       int dat;
       running = true;
       graphicsChip.startTime = System.currentTimeMillis();
@@ -935,17 +935,6 @@ class Dmgcpu {
                   addressWrite((b3 << 8) + b2 + 1, (sp & 0xFF00) >> 8);
                   addressWrite((b3 << 8) + b2, (sp & 0x00FF));
                   break;
-//               case 0x0B: // DEC BC
-//                  pc++;
-//                  c--;
-//                  if ((c & 0xFF00) != 0) {
-//                     c = 0xFF;
-//                     b--;
-//                     if ((b & 0xFF00) != 0) {
-//                        b = 0xFF;
-//                     }
-//                  }
-//                  break;
                case 0x0F: // RRC A
                   pc++;
                   if ((a & 0x01) == 0x01) {
@@ -983,17 +972,6 @@ class Dmgcpu {
                case 0x18: // JR nn
                   pc += 2 + offset;
                   break;
-//               case 0x1B: // DEC DE
-//                  pc++;
-//                  e--;
-//                  if ((e & 0xFF00) != 0) {
-//                     e = 0xFF;
-//                     d--;
-//                     if ((d & 0xFF00) != 0) {
-//                        d = 0xFF;
-//                     }
-//                  }
-//                  break;
                case 0x1F: // RR A
                   pc++;
                   if ((a & 0x01) == 0x01) {
@@ -1347,20 +1325,6 @@ class Dmgcpu {
                      pc++;
                   }
                   break;
-
-               case 0x76: // HALT
-                  interruptsEnabled = true;
-                  // System.out.println("Halted, pc = " + JavaBoy.hexWord(pc));
-                  while (ioHandler.registers[0x0F] == 0) {
-                     initiateInterrupts();
-                     instrCount++;
-                  }
-
-                  // System.out.println("intrcount: " + instrCount + " IE: " +
-                  // JavaBoy.hexByte(ioHandler.registers[0xFF]));
-                  // System.out.println(" Finished halt");
-                  pc++;
-                  break;
                case 0xAF: // XOR A, A (== LD A, 0)
                   pc++;
                   a = 0;
@@ -1457,170 +1421,6 @@ class Dmgcpu {
                   } else {
                      pc += 3;
                   }
-                  break;
-               case 0xCB: // Shift/bit test
-                  pc += 2;
-                  int regNum = b2 & 0x07;
-                  int data = registerRead(regNum);
-                  // System.out.println("0xCB instr! - reg " +
-                  // JavaBoy.hexByte((short) (b2 & 0xF4)));
-                  if ((b2 & 0xC0) == 0) {
-                     switch ((b2 & 0xF8)) {
-                        case 0x00: // RLC A
-                           if ((data & 0x80) == 0x80) {
-                              f = F_CARRY;
-                           } else {
-                              f = 0;
-                           }
-                           data <<= 1;
-                           if ((f & F_CARRY) == F_CARRY) {
-                              data |= 1;
-                           }
-
-                           data &= 0xFF;
-                           if (data == 0) {
-                              f |= F_ZERO;
-                           }
-                           registerWrite(regNum, data);
-                           break;
-                        case 0x08: // RRC A
-                           if ((data & 0x01) == 0x01) {
-                              f = F_CARRY;
-                           } else {
-                              f = 0;
-                           }
-                           data >>= 1;
-                           if ((f & F_CARRY) == F_CARRY) {
-                              data |= 0x80;
-                           }
-                           if (data == 0) {
-                              f |= F_ZERO;
-                           }
-                           registerWrite(regNum, data);
-                           break;
-                        case 0x10: // RL r
-
-                           if ((data & 0x80) == 0x80) {
-                              newf = F_CARRY;
-                           } else {
-                              newf = 0;
-                           }
-                           data <<= 1;
-
-                           if ((f & F_CARRY) == F_CARRY) {
-                              data |= 1;
-                           }
-
-                           data &= 0xFF;
-                           if (data == 0) {
-                              newf |= F_ZERO;
-                           }
-                           f = newf;
-                           registerWrite(regNum, data);
-                           break;
-                        case 0x18: // RR r
-                           if ((data & 0x01) == 0x01) {
-                              newf = F_CARRY;
-                           } else {
-                              newf = 0;
-                           }
-                           data >>= 1;
-
-                           if ((f & F_CARRY) == F_CARRY) {
-                              data |= 0x80;
-                           }
-
-                           if (data == 0) {
-                              newf |= F_ZERO;
-                           }
-                           f = newf;
-                           registerWrite(regNum, data);
-                           break;
-                        case 0x20: // SLA r
-                           if ((data & 0x80) == 0x80) {
-                              f = F_CARRY;
-                           } else {
-                              f = 0;
-                           }
-
-                           data <<= 1;
-
-                           data &= 0xFF;
-                           if (data == 0) {
-                              f |= F_ZERO;
-                           }
-                           registerWrite(regNum, data);
-                           break;
-                        case 0x28: // SRA r
-                           short topBit = 0;
-
-                           topBit = (short) (data & 0x80);
-                           if ((data & 0x01) == 0x01) {
-                              f = F_CARRY;
-                           } else {
-                              f = 0;
-                           }
-
-                           data >>= 1;
-                           data |= topBit;
-
-                           if (data == 0) {
-                              f |= F_ZERO;
-                           }
-                           registerWrite(regNum, data);
-                           break;
-                        case 0x30: // SWAP r
-
-                           data = (short) (((data & 0x0F) << 4) | ((data & 0xF0) >> 4));
-                           if (data == 0) {
-                              f = F_ZERO;
-                           } else {
-                              f = 0;
-                           }
-                           // System.out.println("SWAP - answer is " +
-                           // JavaBoy.hexByte(data));
-                           registerWrite(regNum, data);
-                           break;
-                        case 0x38: // SRL r
-                           if ((data & 0x01) == 0x01) {
-                              f = F_CARRY;
-                           } else {
-                              f = 0;
-                           }
-
-                           data >>= 1;
-
-                           if (data == 0) {
-                              f |= F_ZERO;
-                           }
-                           registerWrite(regNum, data);
-                           break;
-                     }
-                  } else {
-
-                     int bitNumber = (b2 & 0x38) >> 3;
-
-                     if ((b2 & 0xC0) == 0x40) { // BIT n, r
-                        mask = (short) (0x01 << bitNumber);
-                        if ((data & mask) != 0) {
-                           f = (short) ((f & F_CARRY) | F_HALFCARRY);
-                        } else {
-                           f = (short) ((f & F_CARRY) | (F_HALFCARRY + F_ZERO));
-                        }
-                     }
-                     if ((b2 & 0xC0) == 0x80) { // RES n, r
-                        mask = (short) (0xFF - (0x01 << bitNumber));
-                        data = (short) (data & mask);
-                        registerWrite(regNum, data);
-                     }
-                     if ((b2 & 0xC0) == 0xC0) { // SET n, r
-                        mask = (short) (0x01 << bitNumber);
-                        data = (short) (data | mask);
-                        registerWrite(regNum, data);
-                     }
-
-                  }
-
                   break;
                case 0xCC: // CALL Z, nnnnn
                   if ((f & F_ZERO) == F_ZERO) {
@@ -1950,23 +1750,10 @@ class Dmgcpu {
                   break;
 
                default:
-
-                  if ((b1 & 0xC0) == 0x80) { // Byte 0x10?????? indicates ALU op
-                    instructionManager.execute(b1);
-                    
-                  } else if ((b1 & 0xC0) == 0x40) { // Byte 0x01xxxxxxx
-                                                    // indicates
-                                                    // 8-bit ld
-
-                     pc++;
-                     registerWrite((b1 & 0x38) >> 3, registerRead(b1 & 0x07));
-
-                  } else {
-                     System.out.println("Unrecognized opcode (" + JavaBoy.hexByte(b1) + ")");
-                     terminate = true;
-                     pc++;
-                     break;
-                  }
+                  System.out.println("Unrecognized opcode (" + JavaBoy.hexByte(b1) + ")");
+                  terminate = true;
+                  pc++;
+                  break;
             }
          }
          
@@ -2468,7 +2255,7 @@ class Dmgcpu {
 
          // The following section handles LD Reg, Reg instructions
          // Bit 7 6 5 4 3 2 1 0 D = Dest register
-         // 0 1 D D D S S S S = Source register
+         //     0 1 D D D S S S S = Source register
          // The exception to this rule is 0x76, which is HALT, and takes
          // the place of LD (HL), (HL)
 
@@ -2486,14 +2273,14 @@ class Dmgcpu {
 
          // The following section handles arithmetic instructions
          // Bit 7 6 5 4 3 2 1 0 Operation Opcode
-         // 1 0 0 0 0 R R R Add ADD
-         // 1 0 0 0 1 R R R Add with carry ADC
-         // 1 0 0 1 0 R R R Subtract SUB
-         // 1 0 0 1 1 R R R Sub with carry SBC
-         // 1 0 1 0 0 R R R Logical and AND
-         // 1 0 1 0 1 R R R Logical xor XOR
-         // 1 0 1 1 0 R R R Logical or OR
-         // 1 0 1 1 1 R R R Compare? CP
+         //     1 0 0 0 0 R R R Add ADD
+         //     1 0 0 0 1 R R R Add with carry ADC
+         //     1 0 0 1 0 R R R Subtract SUB
+         //     1 0 0 1 1 R R R Sub with carry SBC
+         //     1 0 1 0 0 R R R Logical and AND
+         //     1 0 1 0 1 R R R Logical xor XOR
+         //     1 0 1 1 0 R R R Logical or OR
+         //     1 0 1 1 1 R R R Compare? CP
 
          if ((JavaBoy.unsign(b1) >= 0x80) && (JavaBoy.unsign(b1) <= 0xBF)) {
             int sourceRegister = JavaBoy.unsign(b1) & 0x07;
@@ -2508,17 +2295,17 @@ class Dmgcpu {
          // The following section handles shift instructions
          // These are formed by the byte 0xCB followed by the this:
          // Bit 7 6 5 4 3 2 1 0 Operation Opcode
-         // 0 0 0 0 0 R R R Rotate Left Carry RLC
-         // 0 0 0 0 1 R R R Rotate Right Carry RRC
-         // 0 0 0 1 0 R R R Rotate Left RL
-         // 0 0 0 1 1 R R R Rotate Right RR
-         // 0 0 1 0 0 R R R Arith. Shift Left SLA
-         // 0 0 1 0 1 R R R Arith. Shift Right SRA
-         // 0 0 1 1 0 R R R Hi/Lo Nibble Swap SWAP
-         // 0 0 1 1 1 R R R Shift Right Logical SRL
-         // 0 1 N N N R R R Bit Test n BIT
-         // 1 0 N N N R R R Reset Bit n RES
-         // 1 1 N N N R R R Set Bit n SET
+         //     0 0 0 0 0 R R R Rotate Left Carry RLC
+         //     0 0 0 0 1 R R R Rotate Right Carry RRC
+         //     0 0 0 1 0 R R R Rotate Left RL
+         //     0 0 0 1 1 R R R Rotate Right RR
+         //     0 0 1 0 0 R R R Arith. Shift Left SLA
+         //     0 0 1 0 1 R R R Arith. Shift Right SRA
+         //     0 0 1 1 0 R R R Hi/Lo Nibble Swap SWAP
+         //     0 0 1 1 1 R R R Shift Right Logical SRL
+         //     0 1 N N N R R R Bit Test n BIT
+         //     1 0 N N N R R R Reset Bit n RES
+         //     1 1 N N N R R R Set Bit n SET
 
          if (JavaBoy.unsign(b1) == 0xCB) {
             int operation;
