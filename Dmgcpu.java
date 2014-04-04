@@ -280,12 +280,11 @@ class Dmgcpu {
          // write io state
          ioHandler.saveData(sv, directory);
          
-//         int i = 0;
+         
 //         for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
 //            if(entry.getValue() > 5000){
-//               System.out.println(entry.getKey() + "\t" + entry.getValue() + "\t" + s[i]);
+//               System.out.println(entry.getKey() + "\t" + entry.getValue() + "\t" + s[entry.getKey()]);
 //            }
-//            i++;
 //        }
          sv.close();
          fl.close();
@@ -908,11 +907,11 @@ class Dmgcpu {
          b2 = JavaBoy.unsign((short) offset);
 
          if(!instructionManager.execute(b1, b2, b3, offset)){
-//         if(map.containsKey(b1)){
-//            map.put(b1, map.get(b1) + 1);
-//         } else{
-//            map.put(b1, 1);
-//         }
+//            if (map.containsKey(b1)) {
+//               map.put(b1, map.get(b1) + 1);
+//            } else {
+//               map.put(b1, 1);
+//            }
             
             switch (b1) {
                case 0x07: // RLC A
