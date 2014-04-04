@@ -9,9 +9,8 @@ public class LD_A extends Instruction{
    
    private void setAddress(){
       if(type == 0){
-         address = 0xFF00 + dmgcpu.c;
+         address = 0xFF00 + dmgcpu.registers[c];
       } else{
-         loadRegisters();
          address = ((dmgcpu.registers[reg1] << 8) + dmgcpu.registers[reg2]);
       }
    }
@@ -32,6 +31,6 @@ public class LD_A extends Instruction{
    public void execute(int b1, int b2, int b3, int offset){
       setAddress();
       dmgcpu.pc++;
-      dmgcpu.a = JavaBoy.unsign(dmgcpu.addressRead(address));
+      dmgcpu.registers[a] = JavaBoy.unsign(dmgcpu.addressRead(address));
    }
 }

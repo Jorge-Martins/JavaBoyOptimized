@@ -23,25 +23,25 @@ Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
 import java.awt.*;
-import java.awt.image.*;
-import java.lang.*;
+//import java.awt.image.*;
+//import java.lang.*;
 import java.io.*;
 import java.applet.*;
 import java.net.*;
 import java.util.Calendar;
-import java.awt.event.KeyListener;
-import java.awt.event.WindowListener;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentListener;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.ActionEvent;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ItemEvent;
-import java.util.StringTokenizer;
-
-import javax.sound.sampled.*;
+//import java.awt.event.KeyListener;
+//import java.awt.event.WindowListener;
+//import java.awt.event.ActionListener;
+//import java.awt.event.ComponentListener;
+//import java.awt.event.ItemListener;
+//import java.awt.event.KeyEvent;
+//import java.awt.event.WindowEvent;
+//import java.awt.event.ActionEvent;
+//import java.awt.event.ComponentEvent;
+//import java.awt.event.ItemEvent;
+//import java.util.StringTokenizer;
+//
+//import javax.sound.sampled.*;
 
 /** This class represents the game cartridge and contains methods to load the ROM and battery RAM
  *  (if necessary) from disk or over the web, and handles emulation of ROM mappers and RAM banking.
@@ -761,7 +761,6 @@ class Cartridge {
    }
 
    public int getBatteryRamSize() {
-      int numRamBanks;
       if (rom[0x149] == 0x06) {
          return 512;
       } else {
@@ -909,6 +908,11 @@ class Cartridge {
 }
 
 class NoSaveDataException extends java.lang.Exception {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = 2900008530838214191L;
+
    public NoSaveDataException(String s) {
       super(s);
    }
@@ -1087,7 +1091,6 @@ class WebSaveRAM implements Runnable, DialogListener {
          throw new Exception(str);
       }
 
-      int pos = 0;
       try {
          for (int r = 0; r < cart.getBatteryRamSize(); r++) {
             String sub = str.substring(r * 2, r * 2 + 2);

@@ -11,6 +11,6 @@ public class LD_A_nn extends Instruction{
    @Override
    public void execute(int b1, int b2, int b3, int offset){
       dmgcpu.pc+=3;
-      dmgcpu.a = JavaBoy.unsign(dmgcpu.addressRead((b3 << 8) + b2));
+      dmgcpu.registers[a] = JavaBoy.unsign(dmgcpu.addressRead((b3 << 8) + b2));
    }
 }

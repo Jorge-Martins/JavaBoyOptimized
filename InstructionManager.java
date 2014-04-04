@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class InstructionManager {
-   private int a = 0, b = 1, c = 2, d= 3, e = 4;
+   private final int a = 7, b = 0, c = 1, d = 2, e = 3;
    private Dmgcpu dmgcpu;
    private Map<Integer, Instruction> instructionMap;
    

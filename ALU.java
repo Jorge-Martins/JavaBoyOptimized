@@ -32,6 +32,7 @@ public class ALU extends Instruction{
 abstract class ALUInstruction{
    protected Dmgcpu dmgcpu;
    protected int operand;
+   protected final int a = 7, b = 0, c = 1, d = 2, e = 3;
    
    public abstract void execute(int b1);
 }
@@ -64,25 +65,25 @@ class ADD_A extends ALUInstruction{
    private void add(int b1, int operand){
       dmgcpu.f = 0;
 
-      if ((((dmgcpu.a & 0x0F) + (operand & 0x0F)) & 0xF0) != 0x00) {
+      if (((((dmgcpu.registers[a]) & 0x0F) + (operand & 0x0F)) & 0xF0) != 0x00) {
          dmgcpu.f |= dmgcpu.F_HALFCARRY;
       }
 
-      dmgcpu.a += operand;
+      dmgcpu.registers[a] += operand;
 
-      if (dmgcpu.a == 0) {
+      if (dmgcpu.registers[a] == 0) {
          dmgcpu.f |= dmgcpu.F_ZERO;
       }
 
-      if ((dmgcpu.a & 0xFF00) != 0) { // Perform 8-bit overflow
+      if (((dmgcpu.registers[a]) & 0xFF00) != 0) { // Perform 8-bit overflow
                                // and
                                // set zero flag
-         if (dmgcpu.a == 0x0100) {
+         if (dmgcpu.registers[a] == 0x0100) {
             dmgcpu.f |= dmgcpu.F_ZERO + dmgcpu.F_CARRY + dmgcpu.F_HALFCARRY;
-            dmgcpu.a = 0;
+            dmgcpu.registers[a] = 0;
          } else {
             dmgcpu.f |= dmgcpu.F_CARRY + dmgcpu.F_HALFCARRY;
-            dmgcpu.a &= 0x00FF;
+            dmgcpu.registers[a] &= 0x00FF;
          }
       }
    }
@@ -126,17 +127,17 @@ class SUB_A extends ALUInstruction{
    private void sub(int b1, int operand){
       dmgcpu.f = dmgcpu.F_SUBTRACT;
 
-      if ((((dmgcpu.a & 0x0F) - (operand & 0x0F)) & 0xFFF0) != 0x00) {
+      if (((((dmgcpu.registers[a]) & 0x0F) - (operand & 0x0F)) & 0xFFF0) != 0x00) {
          dmgcpu.f |= dmgcpu.F_HALFCARRY;
       }
 
-      dmgcpu.a -= operand;
+      dmgcpu.registers[a] -= operand;
 
-      if ((dmgcpu.a & 0xFF00) != 0) {
-         dmgcpu.a &= 0x00FF;
+      if (((dmgcpu.registers[a]) & 0xFF00) != 0) {
+         dmgcpu.registers[a] &= 0x00FF;
          dmgcpu.f |= dmgcpu.F_CARRY;
       }
-      if (dmgcpu.a == 0) {
+      if (dmgcpu.registers[a] == 0) {
          dmgcpu.f |= dmgcpu.F_ZERO;
       }
    }
@@ -161,8 +162,8 @@ class AND_A extends ALUInstruction{
    public void execute(int b1){
       operand = dmgcpu.registerRead(b1 & 0x07);
 
-      dmgcpu.a &= operand;
-      if (dmgcpu.a == 0) {
+      dmgcpu.registers[a] &= operand;
+      if (dmgcpu.registers[a] == 0) {
          dmgcpu.f = dmgcpu.F_ZERO;
       } else {
          dmgcpu.f = 0;
@@ -179,8 +180,8 @@ class XOR_A extends ALUInstruction{
    public void execute(int b1){
       operand = dmgcpu.registerRead(b1 & 0x07);
       
-      dmgcpu.a ^= operand;
-      if (dmgcpu.a == 0) {
+      dmgcpu.registers[a] ^= operand;
+      if (dmgcpu.registers[a] == 0) {
          dmgcpu.f = dmgcpu.F_ZERO;
       } else {
          dmgcpu.f = 0;
@@ -197,8 +198,8 @@ class OR_A extends ALUInstruction{
    public void execute(int b1){
       operand = dmgcpu.registerRead(b1 & 0x07);
       
-      dmgcpu.a |= operand;
-      if (dmgcpu.a == 0) {
+      dmgcpu.registers[a] |= operand;
+      if (dmgcpu.registers[a] == 0) {
          dmgcpu.f = dmgcpu.F_ZERO;
       } else {
          dmgcpu.f = 0;
@@ -217,13 +218,13 @@ class CP_A extends ALUInstruction{
       operand = dmgcpu.registerRead(b1 & 0x07);
       
       dmgcpu.f = dmgcpu.F_SUBTRACT;
-      if (dmgcpu.a == operand) {
+      if (dmgcpu.registers[a] == operand) {
          dmgcpu.f |= dmgcpu.F_ZERO;
       }
-      if (dmgcpu.a < operand) {
+      if (dmgcpu.registers[a] < operand) {
          dmgcpu.f |= dmgcpu.F_CARRY;
       }
-      if ((dmgcpu.a & 0x0F) < (operand & 0x0F)) {
+      if (((dmgcpu.registers[a]) & 0x0F) < (operand & 0x0F)) {
          dmgcpu.f |= dmgcpu.F_HALFCARRY;
       }
    }

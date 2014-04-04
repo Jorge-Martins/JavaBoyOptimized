@@ -24,24 +24,23 @@ Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 import java.awt.*;
-import java.awt.image.*;
-import java.lang.*;
+//import java.awt.image.*;
+//import java.lang.*;
 import java.io.*;
-import java.applet.*;
-import java.net.*;
-import java.awt.event.KeyListener;
-import java.awt.event.WindowListener;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentListener;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.ActionEvent;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ItemEvent;
-import java.util.*;
-
-import javax.sound.sampled.*;
+//import java.applet.*;
+//import java.net.*;
+//import java.awt.event.KeyListener;
+//import java.awt.event.WindowListener;
+//import java.awt.event.ActionListener;
+//import java.awt.event.ComponentListener;
+//import java.awt.event.ItemListener;
+//import java.awt.event.KeyEvent;
+//import java.awt.event.WindowEvent;
+//import java.awt.event.ActionEvent;
+//import java.awt.event.ComponentEvent;
+//import java.awt.event.ItemEvent;
+//import java.util.*;
+//import javax.sound.sampled.*;
 
 /** This is the main controlling class for the emulation
  *  It contains the code to emulate the Z80-like processor
@@ -52,10 +51,12 @@ import javax.sound.sampled.*;
 class Dmgcpu {
    /** Registers: 8-bit */
    
-   int a, b, c, d, e, f;
+   private final int a = 7, b = 0, c = 1, d = 2, e = 3;
    short newf;
-   int[] registers = new int[5];
    
+   // b = 0, c = 1, d = 2, e = 3, a = 7
+   int[] registers = new int[8];
+   int f;
    /** Registers: 16-bit */
    public int sp, pc, hl;
 
@@ -190,11 +191,11 @@ class Dmgcpu {
    private void saveData(DataOutputStream sv, String directory) {
       try {
          // 8 bit registers
-         sv.write(a);
-         sv.write(b);
-         sv.write(c);
-         sv.write(d);
-         sv.write(e);
+         sv.write(registers[a]);
+         sv.write(registers[b]);
+         sv.write(registers[c]);
+         sv.write(registers[d]);
+         sv.write(registers[e]);
          sv.write(f);
 
          // 16 bit registers
@@ -221,11 +222,11 @@ class Dmgcpu {
       try {
          int size = 0;
          // 8 bit registers
-         a = sv.read();
-         b = sv.read();
-         c = sv.read();
-         d = sv.read();
-         e = sv.read();
+         registers[a] = sv.read();
+         registers[b] = sv.read();
+         registers[c] = sv.read();
+         registers[d] = sv.read();
+         registers[e] = sv.read();
          f = sv.read();
 
          // 16 bit registers
@@ -348,11 +349,6 @@ class Dmgcpu {
    /** Force the execution thread to stop and return to it's caller */
    public void terminateProcess() {
       terminate = true;
-      /*
-       * do { try { java.lang.Thread.sleep(100);
-       * System.out.println("Wating for CPU..."); } catch (InterruptedException
-       * e) { // Nothing } } while (running);
-       */
    }
 
    /**
@@ -360,19 +356,6 @@ class Dmgcpu {
     * the correct parts of the memory
     */
    public final short addressRead(int addr) {
-
-      /*
-       * if ((addr >= 0xDFD8) && (addr <= 0xDFF0) && (running)) {
-       * System.out.println(JavaBoy.hexWord(addr) + " read at " +
-       * JavaBoy.hexWord(pc) + " bank " + cartridge.currentBank); }
-       */
-
-      /*
-       * if ((addr < 0) || (addr > 65535)) {
-       * System.out.println("Tried to read address " + addr + ".  pc = " +
-       * JavaBoy.hexWord(pc)); return 0xFF; }
-       */
-
       addr = addr & 0xFFFF;
 
       switch ((addr & 0xF000)) {
@@ -402,8 +385,7 @@ class Dmgcpu {
 
          case 0xE000:
             return mainRam[addr - 0xE000];
-            /* (short) (mainRam[addr - 0xE000] & 0x00FF); */
-
+            
          case 0xF000:
             if (addr < 0xFE00) {
                return mainRam[addr - 0xE000];
@@ -425,24 +407,6 @@ class Dmgcpu {
     * the right parts of memory.
     */
    public final void addressWrite(int addr, int data) {
-
-      /*
-       * if ((addr >= 0xCFF8) && (addr <= 0xCFF8) && (running)) {
-       * System.out.println(JavaBoy.hexWord(data) + " written to " +
-       * JavaBoy.hexWord(addr) + " at " + JavaBoy.hexWord(pc) + " bank " +
-       * cartridge.currentBank); } if ((addr >= 0xEFF8) && (addr <= 0xEFF8) &&
-       * (running)) { System.out.println(JavaBoy.hexWord(data) + " written to "
-       * + JavaBoy.hexWord(addr) + " at " + JavaBoy.hexWord(pc) + " bank " +
-       * cartridge.currentBank); }
-       */
-
-      /*
-       * if ((addr < 0) || (addr > 65535)) {
-       * System.out.println(JavaBoy.hexWord(data) + " written to " +
-       * JavaBoy.hexWord(addr) + " at " + JavaBoy.hexWord(pc) + " bank " +
-       * cartridge.currentBank); }
-       */
-
       switch (addr & 0xF000) {
          case 0x0000:
          case 0x1000:
@@ -456,9 +420,7 @@ class Dmgcpu {
                cartridge.debuggerAddressWrite(addr, data);
             } else {
                cartridge.addressWrite(addr, data);
-               // System.out.println("Tried to write to ROM! PC = " +
-               // JavaBoy.hexWord(pc) + ", Data = " +
-               // JavaBoy.hexByte(JavaBoy.unsign((byte) data)));
+               
             }
             break;
 
@@ -502,23 +464,12 @@ class Dmgcpu {
    }
 
    public final void addressWriteOld(int addr, int data) {
-
-      /*
-       * if ((addr >= 0xFFA4) && (addr <= 0xFFA5) && (running)) {
-       * System.out.println(JavaBoy.hexWord(addr) + " written at " +
-       * JavaBoy.hexWord(pc) + " bank " + cartridge.currentBank); }
-       */
-
-      // System.out.print(JavaBoy.hexByte(JavaBoy.unsign((short) data)) +
-      // " --> " + JavaBoy.hexWord(addr) + ", ");
       if ((addr < 0x8000)) {
          if (!running) {
             cartridge.debuggerAddressWrite(addr, data);
          } else {
             cartridge.addressWrite(addr, data);
-            // System.out.println("Tried to write to ROM! PC = " +
-            // JavaBoy.hexWord(pc) + ", Data = " +
-            // JavaBoy.hexByte(JavaBoy.unsign((byte) data)));
+            
          }
       } else if (addr < 0xA000) {
          try {
@@ -528,8 +479,7 @@ class Dmgcpu {
          }
       } else if (addr < 0xC000) {
          // RAM Bank write
-         // System.out.println("RAM bank write! + " + JavaBoy.hexWord(addr) +
-         // " = " + JavaBoy.hexByte(data) + " at " + JavaBoy.hexWord(pc));
+         
          cartridge.addressWrite(addr, data);
       } else if (addr < 0xE000) {
          mainRam[addr - 0xC000] = (byte) data;
@@ -538,10 +488,6 @@ class Dmgcpu {
       } else if (addr < 0xFF00) {
          oam[addr - 0xFE00] = (byte) data;
       } else if (addr <= 0xFFFF) {
-         if (addr == 0xFF80) {
-            // System.out.println("Register write: " + JavaBoy.hexWord(addr) +
-            // " = " + JavaBoy.hexWord(data));
-         }
          ioHandler.ioWrite(addr - 0xFF00, (short) data);
          // registers[addr - 0xFF00] = (byte) data;
       } else {
@@ -552,15 +498,15 @@ class Dmgcpu {
    /** Sets the value of a register by it's name */
    public boolean setRegister(String reg, int value) {
       if (reg.equals("a") || reg.equals("acc")) {
-         a = (short) value;
+         registers[a] = (short) value;
       } else if (reg.equals("b")) {
-         b = (short) value;
+         registers[b] = (short) value;
       } else if (reg.equals("c")) {
-         c = (short) value;
+         registers[c] = (short) value;
       } else if (reg.equals("d")) {
-         d = (short) value;
+         registers[d] = (short) value;
       } else if (reg.equals("e")) {
-         e = (short) value;
+         registers[e] = (short) value;
       } else if (reg.equals("f")) {
          f = (short) value;
       } else if (reg.equals("h")) {
@@ -572,11 +518,11 @@ class Dmgcpu {
       } else if (reg.equals("pc") || reg.equals("ip")) {
          pc = value;
       } else if (reg.equals("bc")) {
-         b = (short) (value >> 8);
-         c = (short) (value & 0x00FF);
+         registers[b] = (short) (value >> 8);
+         registers[c] = (short) (value & 0x00FF);
       } else if (reg.equals("de")) {
-         d = (short) (value >> 8);
-         e = (short) (value & 0x00FF);
+         registers[d] = (short) (value >> 8);
+         registers[e] = (short) (value & 0x00FF);
       } else if (reg.equals("hl")) {
          hl = value;
       } else {
@@ -586,13 +532,13 @@ class Dmgcpu {
    }
 
    public void setBC(int value) {
-      b = (short) ((value & 0xFF00) >> 8);
-      c = (short) (value & 0x00FF);
+      registers[b] = (short) ((value & 0xFF00) >> 8);
+      registers[c] = (short) (value & 0x00FF);
    }
 
    public void setDE(int value) {
-      d = (short) ((value & 0xFF00) >> 8);
-      e = (short) (value & 0x00FF);
+      registers[d] = (short) ((value & 0xFF00) >> 8);
+      registers[e] = (short) (value & 0x00FF);
    }
 
    public void setHL(int value) {
@@ -601,58 +547,38 @@ class Dmgcpu {
 
    /** Performs a read of a register by internal register number */
    public final int registerRead(int regNum) {
-      switch (regNum) {
-         case 0:
-            return b;
-         case 1:
-            return c;
-         case 2:
-            return d;
-         case 3:
-            return e;
-         case 4:
+      if((regNum >= 0 && regNum <= 3) || regNum == 7){
+         return registers[regNum];
+      } else{
+         if(regNum == 4){
             return (short) ((hl & 0xFF00) >> 8);
-         case 5:
+         } else if(regNum == 5){
             return (short) (hl & 0x00FF);
-         case 6:
+         } else if(regNum == 6){
             return JavaBoy.unsign(addressRead(hl));
-         case 7:
-            return a;
-         default:
-            return -1;
+         }
       }
+      return -1;
    }
 
    /** Performs a write of a register by internal register number */
    public final void registerWrite(int regNum, int data) {
-      switch (regNum) {
-         case 0:
-            b = (short) data;
-            return;
-         case 1:
-            c = (short) data;
-            return;
-         case 2:
-            d = (short) data;
-            return;
-         case 3:
-            e = (short) data;
-            return;
-         case 4:
+      if((regNum >= 0 && regNum <= 3) || regNum == 7){
+         registers[regNum] = (short) data;
+         return;
+      } else{
+         if(regNum == 4){
             hl = (hl & 0x00FF) | (data << 8);
             return;
-         case 5:
+         } else if(regNum == 5){
             hl = (hl & 0xFF00) | data;
             return;
-         case 6:
+         } else if(regNum == 6){
             addressWrite(hl, data);
             return;
-         case 7:
-            a = (short) data;
-            return;
-         default:
-            return;
+         }
       }
+      return;
    }
 
    public void checkEnableGbc() {
@@ -681,9 +607,9 @@ class Dmgcpu {
       instrCount = 0;
 
       if (gbcFeatures) {
-         a = 0x11;
+         registers[a] = 0x11;
       } else {
-         a = 0x01;
+         registers[a] = 0x01;
       }
 
       for (int r = 0; r < 0x8000; r++) {
@@ -696,7 +622,6 @@ class Dmgcpu {
       JavaBoy.debugLog("CPU reset");
 
       ioHandler.reset();
-      // pc = 0x0100;
    }
 
    public void setDoubleSpeedCpu(boolean enabled) {
@@ -843,9 +768,7 @@ class Dmgcpu {
 
          graphicsChip.notifyScanline(JavaBoy.unsign(ioHandler.registers[0x44]));
          ioHandler.registers[0x44] = (byte) (JavaBoy.unsign(ioHandler.registers[0x44]) + 1);
-         // System.out.println("Reg 44 = " +
-         // JavaBoy.unsign(ioHandler.registers[0x44]));
-
+         
          if (JavaBoy.unsign(ioHandler.registers[0x44]) >= 153) {
             // System.out.println("VBlank");
 
@@ -918,14 +841,14 @@ class Dmgcpu {
                   pc++;
                   f = 0;
 
-                  a <<= 1;
+                  registers[a] <<= 1;
 
-                  if ((a & 0x0100) != 0) {
+                  if (((registers[a]) & 0x0100) != 0) {
                      f |= F_CARRY;
-                     a |= 1;
-                     a &= 0xFF;
+                     registers[a] |= 1;
+                     registers[a] &= 0xFF;
                   }
-                  if (a == 0) {
+                  if (registers[a] == 0) {
                      f |= F_ZERO;
                   }
                   break;
@@ -936,34 +859,34 @@ class Dmgcpu {
                   break;
                case 0x0F: // RRC A
                   pc++;
-                  if ((a & 0x01) == 0x01) {
+                  if (((registers[a]) & 0x01) == 0x01) {
                      f = F_CARRY;
                   } else {
                      f = 0;
                   }
-                  a >>= 1;
+                  registers[a] >>= 1;
                   if ((f & F_CARRY) == F_CARRY) {
-                     a |= 0x80;
+                     registers[a] |= 0x80;
                   }
-                  if (a == 0) {
+                  if (registers[a] == 0) {
                      f |= F_ZERO;
                   }
                   break;
                case 0x17: // RL A
                   pc++;
-                  if ((a & 0x80) == 0x80) {
+                  if (((registers[a]) & 0x80) == 0x80) {
                      newf = F_CARRY;
                   } else {
                      newf = 0;
                   }
-                  a <<= 1;
+                  registers[a] <<= 1;
 
                   if ((f & F_CARRY) == F_CARRY) {
-                     a |= 1;
+                     registers[a] |= 1;
                   }
 
-                  a &= 0xFF;
-                  if (a == 0) {
+                  registers[a] &= 0xFF;
+                  if (registers[a] == 0) {
                      newf |= F_ZERO;
                   }
                   f = newf;
@@ -973,18 +896,18 @@ class Dmgcpu {
                   break;
                case 0x1F: // RR A
                   pc++;
-                  if ((a & 0x01) == 0x01) {
+                  if (((registers[a]) & 0x01) == 0x01) {
                      newf = F_CARRY;
                   } else {
                      newf = 0;
                   }
-                  a >>= 1;
+                  registers[a] >>= 1;
 
                   if ((f & F_CARRY) == F_CARRY) {
-                     a |= 0x80;
+                     registers[a] |= 0x80;
                   }
 
-                  if (a == 0) {
+                  if (registers[a] == 0) {
                      newf |= F_ZERO;
                   }
                   f = newf;
@@ -1002,7 +925,7 @@ class Dmgcpu {
                   break;
                case 0x22: // LD (HL+), A
                   pc++;
-                  addressWrite(hl, a);
+                  addressWrite(hl, registers[a]);
                   hl = (hl + 1) & 0xFFFF;
                   break;
                case 0x23: // INC HL
@@ -1055,8 +978,8 @@ class Dmgcpu {
                case 0x27: // DAA ** This could be wrong! **
                   pc++;
 
-                  int upperNibble = (a & 0xF0) >> 4;
-                  int lowerNibble = a & 0x0F;
+                  int upperNibble = ((registers[a]) & 0xF0) >> 4;
+                  int lowerNibble = (registers[a]) & 0x0F;
 
                   // System.out.println("Daa at " + JavaBoy.hexWord(pc));
 
@@ -1066,29 +989,29 @@ class Dmgcpu {
 
                      if ((f & F_CARRY) == 0) {
                         if ((upperNibble <= 8) && (lowerNibble >= 0xA) && ((f & F_HALFCARRY) == 0)) {
-                           a += 0x06;
+                           registers[a] += 0x06;
                         }
 
                         if ((upperNibble <= 9) && (lowerNibble <= 0x3)
                                  && ((f & F_HALFCARRY) == F_HALFCARRY)) {
-                           a += 0x06;
+                           registers[a] += 0x06;
                         }
 
                         if ((upperNibble >= 0xA) && (lowerNibble <= 0x9)
                                  && ((f & F_HALFCARRY) == 0)) {
-                           a += 0x60;
+                           registers[a] += 0x60;
                            newf |= F_CARRY;
                         }
 
                         if ((upperNibble >= 0x9) && (lowerNibble >= 0xA)
                                  && ((f & F_HALFCARRY) == 0)) {
-                           a += 0x66;
+                           registers[a] += 0x66;
                            newf |= F_CARRY;
                         }
 
                         if ((upperNibble >= 0xA) && (lowerNibble <= 0x3)
                                  && ((f & F_HALFCARRY) == F_HALFCARRY)) {
-                           a += 0x66;
+                           registers[a] += 0x66;
                            newf |= F_CARRY;
                         }
 
@@ -1096,19 +1019,19 @@ class Dmgcpu {
 
                         if ((upperNibble <= 0x2) && (lowerNibble <= 0x9)
                                  && ((f & F_HALFCARRY) == 0)) {
-                           a += 0x60;
+                           registers[a] += 0x60;
                            newf |= F_CARRY;
                         }
 
                         if ((upperNibble <= 0x2) && (lowerNibble >= 0xA)
                                  && ((f & F_HALFCARRY) == 0)) {
-                           a += 0x66;
+                           registers[a] += 0x66;
                            newf |= F_CARRY;
                         }
 
                         if ((upperNibble <= 0x3) && (lowerNibble <= 0x3)
                                  && ((f & F_HALFCARRY) == F_HALFCARRY)) {
-                           a += 0x66;
+                           registers[a] += 0x66;
                            newf |= F_CARRY;
                         }
 
@@ -1120,27 +1043,27 @@ class Dmgcpu {
 
                         if ((upperNibble <= 0x8) && (lowerNibble >= 0x6)
                                  && ((f & F_HALFCARRY) == F_HALFCARRY)) {
-                           a += 0xFA;
+                           registers[a] += 0xFA;
                         }
 
                      } else { // Carry is set
 
                         if ((upperNibble >= 0x7) && (lowerNibble <= 0x9)
                                  && ((f & F_HALFCARRY) == 0)) {
-                           a += 0xA0;
+                           registers[a] += 0xA0;
                            newf |= F_CARRY;
                         }
 
                         if ((upperNibble >= 0x6) && (lowerNibble >= 0x6)
                                  && ((f & F_HALFCARRY) == F_HALFCARRY)) {
-                           a += 0x9A;
+                           registers[a] += 0x9A;
                            newf |= F_CARRY;
                         }
                      }
                   }
 
-                  a &= 0x00FF;
-                  if (a == 0)
+                  registers[a] &= 0x00FF;
+                  if (registers[a] == 0)
                      newf |= F_ZERO;
 
                   f = newf;
@@ -1155,7 +1078,7 @@ class Dmgcpu {
                   break;
                case 0x2A: // LDI A, (HL)
                   pc++;
-                  a = JavaBoy.unsign(addressRead(hl));
+                  registers[a] = JavaBoy.unsign(addressRead(hl));
                   hl++;
                   break;
                case 0x2B: // DEC HL
@@ -1211,12 +1134,8 @@ class Dmgcpu {
                   break;
                case 0x2F: // CPL A
                   pc++;
-                  short mask = 0x80;
-                  /*
-                   * short result = 0; for (int n = 0; n < 8; n++) { if ((a &
-                   * mask) == 0) { result |= mask; } else { } mask >>= 1; }
-                   */
-                  a = (short) ((~a) & 0x00FF);
+                  
+                  registers[a] = (short) ((~(registers[a])) & 0x00FF);
                   f = (short) ((f & (F_CARRY | F_ZERO)) | F_SUBTRACT | F_HALFCARRY);
                   break;
                case 0x30: // JR NC, nn
@@ -1232,7 +1151,7 @@ class Dmgcpu {
                   break;
                case 0x32:
                   pc++;
-                  addressWrite(hl, a); // LD (HL-), A
+                  addressWrite(hl, registers[a]); // LD (HL-), A
                   hl--;
                   break;
                case 0x33: // INC SP
@@ -1298,7 +1217,7 @@ class Dmgcpu {
                   break;
                case 0x3A: // LD A, (HL-)
                   pc++;
-                  a = JavaBoy.unsign(addressRead(hl));
+                  registers[a] = JavaBoy.unsign(addressRead(hl));
                   hl = (hl - 1) & 0xFFFF;
                   break;
                case 0x3B: // DEC SP
@@ -1326,7 +1245,7 @@ class Dmgcpu {
                   break;
                case 0xAF: // XOR A, A (== LD A, 0)
                   pc++;
-                  a = 0;
+                  registers[a] = 0;
                   f = 0x80; // Set zero flag
                   break;
                case 0xC0: // RET NZ
@@ -1340,8 +1259,8 @@ class Dmgcpu {
                   break;
                case 0xC1: // POP BC
                   pc++;
-                  c = JavaBoy.unsign(addressRead(sp));
-                  b = JavaBoy.unsign(addressRead(sp + 1));
+                  registers[c] = JavaBoy.unsign(addressRead(sp));
+                  registers[b] = JavaBoy.unsign(addressRead(sp + 1));
                   sp += 2;
                   break;
                case 0xC2: // JP NZ, nnnn
@@ -1369,28 +1288,28 @@ class Dmgcpu {
                   pc++;
                   sp -= 2;
                   sp &= 0xFFFF;
-                  addressWrite(sp, c);
-                  addressWrite(sp + 1, b);
+                  addressWrite(sp, registers[c]);
+                  addressWrite(sp + 1, registers[b]);
                   break;
                case 0xC6: // ADD A, nn
                   pc += 2;
                   f = 0;
 
-                  if ((((a & 0x0F) + (b2 & 0x0F)) & 0xF0) != 0x00) {
+                  if (((((registers[a]) & 0x0F) + (b2 & 0x0F)) & 0xF0) != 0x00) {
                      f |= F_HALFCARRY;
                   }
 
-                  a += b2;
+                  registers[a] += b2;
 
-                  if ((a & 0xFF00) != 0) { // Perform 8-bit overflow and set
+                  if (((registers[a]) & 0xFF00) != 0) { // Perform 8-bit overflow and set
                                            // zero
                                            // flag
-                     if (a == 0x0100) {
+                     if (registers[a] == 0x0100) {
                         f |= F_ZERO + F_CARRY + F_HALFCARRY;
-                        a = 0;
+                        registers[a] = 0;
                      } else {
                         f |= F_CARRY + F_HALFCARRY;
-                        a &= 0x00FF;
+                        (registers[a]) &= 0x00FF;
                      }
                   }
                   break;
@@ -1447,21 +1366,21 @@ class Dmgcpu {
                   }
                   f = 0;
 
-                  if ((((a & 0x0F) + (b2 & 0x0F)) & 0xF0) != 0x00) {
+                  if (((((registers[a]) & 0x0F) + (b2 & 0x0F)) & 0xF0) != 0x00) {
                      f |= F_HALFCARRY;
                   }
 
-                  a += b2;
+                  registers[a] += b2;
 
-                  if ((a & 0xFF00) != 0) { // Perform 8-bit overflow and set
+                  if (((registers[a]) & 0xFF00) != 0) { // Perform 8-bit overflow and set
                                            // zero
                                            // flag
-                     if (a == 0x0100) {
+                     if (registers[a] == 0x0100) {
                         f |= F_ZERO + F_CARRY + F_HALFCARRY;
-                        a = 0;
+                        registers[a] = 0;
                      } else {
                         f |= F_CARRY + F_HALFCARRY;
-                        a &= 0x00FF;
+                        registers[a] &= 0x00FF;
                      }
                   }
                   break;
@@ -1484,8 +1403,8 @@ class Dmgcpu {
                   break;
                case 0xD1: // POP DE
                   pc++;
-                  e = JavaBoy.unsign(addressRead(sp));
-                  d = JavaBoy.unsign(addressRead(sp + 1));
+                  registers[e] = JavaBoy.unsign(addressRead(sp));
+                  registers[d] = JavaBoy.unsign(addressRead(sp + 1));
                   sp += 2;
                   break;
                case 0xD2: // JP NC, nnnn
@@ -1510,25 +1429,25 @@ class Dmgcpu {
                   pc++;
                   sp -= 2;
                   sp &= 0xFFFF;
-                  addressWrite(sp, e);
-                  addressWrite(sp + 1, d);
+                  addressWrite(sp, registers[e]);
+                  addressWrite(sp + 1, registers[d]);
                   break;
                case 0xD6: // SUB A, nn
                   pc += 2;
 
                   f = F_SUBTRACT;
 
-                  if ((((a & 0x0F) - (b2 & 0x0F)) & 0xFFF0) != 0x00) {
+                  if (((((registers[a]) & 0x0F) - (b2 & 0x0F)) & 0xFFF0) != 0x00) {
                      f |= F_HALFCARRY;
                   }
 
-                  a -= b2;
+                  registers[a] -= b2;
 
-                  if ((a & 0xFF00) != 0) {
-                     a &= 0x00FF;
+                  if (((registers[a]) & 0xFF00) != 0) {
+                     registers[a] &= 0x00FF;
                      f |= F_CARRY;
                   }
-                  if (a == 0) {
+                  if (registers[a] == 0) {
                      f |= F_ZERO;
                   }
                   break;
@@ -1579,18 +1498,18 @@ class Dmgcpu {
                   }
 
                   f = F_SUBTRACT;
-                  if ((((a & 0x0F) - (b2 & 0x0F)) & 0xFFF0) != 0x00) {
+                  if (((((registers[a]) & 0x0F) - (b2 & 0x0F)) & 0xFFF0) != 0x00) {
                      f |= F_HALFCARRY;
                   }
 
-                  a -= b2;
+                  registers[a] -= b2;
 
-                  if ((a & 0xFF00) != 0) {
-                     a &= 0x00FF;
+                  if (((registers[a]) & 0xFF00) != 0) {
+                     registers[a] &= 0x00FF;
                      f |= F_CARRY;
                   }
 
-                  if (a == 0) {
+                  if (registers[a] == 0) {
                      f |= F_ZERO;
                   }
                   break;
@@ -1603,7 +1522,7 @@ class Dmgcpu {
                   break;
                case 0xE0: // LDH (FFnn), A
                   pc += 2;
-                  addressWrite(0xFF00 + b2, a);
+                  addressWrite(0xFF00 + b2, registers[a]);
                   break;
                case 0xE1: // POP HL
                   pc++;
@@ -1612,7 +1531,7 @@ class Dmgcpu {
                   break;
                case 0xE2: // LDH (FF00 + C), A
                   pc++;
-                  addressWrite(0xFF00 + c, a);
+                  addressWrite(0xFF00 + registers[c], registers[a]);
                   break;
                case 0xE5: // PUSH HL
                   pc++;
@@ -1623,8 +1542,8 @@ class Dmgcpu {
                   break;
                case 0xE6: // AND nn
                   pc += 2;
-                  a &= b2;
-                  if (a == 0) {
+                  registers[a] &= b2;
+                  if (registers[a] == 0) {
                      f = F_ZERO;
                   } else {
                      f = 0;
@@ -1653,12 +1572,12 @@ class Dmgcpu {
                   break;
                case 0xEA: // LD (nnnn), A
                   pc += 3;
-                  addressWrite((b3 << 8) + b2, a);
+                  addressWrite((b3 << 8) + b2, registers[a]);
                   break;
                case 0xEE: // XOR A, nn
                   pc += 2;
-                  a ^= b2;
-                  if (a == 0) {
+                  registers[a] ^= b2;
+                  if (registers[a] == 0) {
                      f = F_ZERO;
                   } else {
                      f = 0;
@@ -1673,12 +1592,12 @@ class Dmgcpu {
                   break;
                case 0xF0: // LDH A, (FFnn)
                   pc += 2;
-                  a = JavaBoy.unsign(addressRead(0xFF00 + b2));
+                  registers[a] = JavaBoy.unsign(addressRead(0xFF00 + b2));
                   break;
                case 0xF1: // POP AF
                   pc++;
                   f = JavaBoy.unsign(addressRead(sp));
-                  a = JavaBoy.unsign(addressRead(sp + 1));
+                  registers[a] = JavaBoy.unsign(addressRead(sp + 1));
                   sp += 2;
                   break;
                case 0xF3: // DI
@@ -1691,12 +1610,12 @@ class Dmgcpu {
                   sp -= 2;
                   sp &= 0xFFFF;
                   addressWrite(sp, f);
-                  addressWrite(sp + 1, a);
+                  addressWrite(sp + 1, registers[a]);
                   break;
                case 0xF6: // OR A, nn
                   pc += 2;
-                  a |= b2;
-                  if (a == 0) {
+                  registers[a] |= b2;
+                  if (registers[a] == 0) {
                      f = F_ZERO;
                   } else {
                      f = 0;
@@ -1732,10 +1651,10 @@ class Dmgcpu {
                case 0xFE: // CP nn ** FLAGS ARE WRONG! **
                   pc += 2;
                   f = 0;
-                  if (b2 == a) {
+                  if (b2 == registers[a]) {
                      f |= F_ZERO;
                   } else {
-                     if (a < b2) {
+                     if (registers[a] < b2) {
                         f |= F_CARRY;
                      }
                   }
@@ -2359,22 +2278,22 @@ class Dmgcpu {
    }
    
    
-   private String s[] ={
-            "NOP", "LD BC,nn", "LD (BC),A", "INC BC", "INC B", "DEC B", "LD B,n", "RLC A", "LD (nn),SP", "ADD HL,BC", "LD A,(BC)", "DEC BC", "INC C", "DEC C", "LD C,n", "RRC A",
-            "STOP",  "LD DE,nn", "LD (DE),A", "INC DE", "INC D", "DEC D", "LD D,n", "RL A", "JR n", "ADD HL,DE", "LD A,(DE)", "DEC DE", "INC E", "DEC E", "LD E,n", "RR A",
-            "JR NZ,n", "LD HL,nn", "LDI (HL),A", "INC HL", "INC H", "DEC H", "LD H,n", "DAA", "JR Z,n", "ADD HL,HL", "LDI A,(HL)", "DEC HL", "INC L", "DEC L", "LD L,n", "CPL",
-            "JR NC,n", "LD SP,nn", "LDD (HL),A", "INC SP", "INC (HL)", "DEC (HL)", "LD (HL),n", "SCF", "JR C,n", "ADD HL,SP", "LDD A,(HL)", "DEC SP", "INC A", "DEC A", "LD A,n", "CCF",
-            "LD B,B", "LD B,C", "LD B,D", "LD B,E", "LD B,H", "LD B,L", "LD B,(HL)", "LD B,A", "LD C,B", "LD C,C", "LD C,D", "LD C,E", "LD C,H", "LD C,L", "LD C,(HL)", "LD C,A",
-            "LD D,B", "LD D,C", "LD D,D", "LD D,E", "LD D,H", "LD D,L", "LD D,(HL)", "LD D,A", "LD E,B", "LD E,C", "LD E,D", "LD E,E", "LD E,H", "LD E,L", "LD E,(HL)", "LD E,A",
-            "LD H,B", "LD H,C", "LD H,D", "LD H,E", "LD H,H", "LD H,L", "LD H,(HL)", "LD H,A", "LD L,B", "LD L,C", "LD L,D", "LD L,E", "LD L,H", "LD L,L", "LD L,(HL)", "LD L,A",
-            "LD (HL),B", "LD (HL),C", "LD (HL),D", "LD (HL),E", "LD (HL),H", "LD (HL),L", "HALT", "LD (HL),A", "LD A,B", "LD A,C", "LD A,D", "LD A,E", "LD A,H", "LD A,L", "LD A,(HL)", "LD A,A",
-            "ADD A,B", "ADD A,C", "ADD A,D", "ADD A,E", "ADD A,H", "ADD A,L", "ADD A,(HL)",  "ADD A,A", "ADC A,B", "ADC A,C", "ADC A,D", "ADC A,E", "ADC A,H", "ADC A,L", "ADC A,(HL)", "ADC A,A",
-            "SUB A,B", "SUB A,C", "SUB A,D", "SUB A,E", "SUB A,H", "SUB A,L", "SUB A,(HL)",  "SUB A,A", "SBC A,B", "SBC A,C", "SBC A,D", "SBC A,E", "SBC A,H", "SBC A,L", "SBC A,(HL)", "SBC A,A",
-            "AND B", "AND C", "AND D", "AND E", "AND H", "AND L", "AND (HL)", "AND A", "XOR B", "XOR C", "XOR D", "XOR E", "XOR H", "XOR L", "XOR (HL)", "XOR A",
-            "OR B", "OR C", "OR D", "OR E", "OR H", "OR L", "OR (HL)", "OR A", "CP B", "CP C", "CP D", "CP E", "CP H", "CP L", "CP (HL)", "CP A",
-            "RET NZ", "POP BC", "JP NZ,nn", "JP nn", "CALL NZ,nn", "PUSH BC", "ADD A,n", "RST 0", "RET Z", "RET", "JP Z,nn", "Ext ops", "CALL Z,nn", "CALL nn", "ADC A,n", "RST 8",
-            "RET NC", "POP DE", "JP NC,nn", "XX", "CALL NC,nn", "PUSH DE", "SUB A,n", "RST 10", "RET C", "RETI", "JP C,nn", "XX", "CALL C,nn", "XX", "SBC A,n", "RST 18",
-            "LDH (n),A", "POP HL", "LDH (C),A", "XX", "XX", "PUSH HL", "AND n", "RST 20", "ADD SP,d", "JP (HL)", "LD (nn),A", "XX", "XX", "XX", "XOR n", "RST 28",
-            "LDH A,(n)", "POP AF", "XX", "DI", "XX", "PUSH AF", "OR n", "RST 30", "LDHL SP,d", "LD SP,HL", "LD A,(nn)", "EI", "XX", "XX", "CP n", "RST 38" 
-   };
+//   private String s[] ={
+//            "NOP", "LD BC,nn", "LD (BC),A", "INC BC", "INC B", "DEC B", "LD B,n", "RLC A", "LD (nn),SP", "ADD HL,BC", "LD A,(BC)", "DEC BC", "INC C", "DEC C", "LD C,n", "RRC A",
+//            "STOP",  "LD DE,nn", "LD (DE),A", "INC DE", "INC D", "DEC D", "LD D,n", "RL A", "JR n", "ADD HL,DE", "LD A,(DE)", "DEC DE", "INC E", "DEC E", "LD E,n", "RR A",
+//            "JR NZ,n", "LD HL,nn", "LDI (HL),A", "INC HL", "INC H", "DEC H", "LD H,n", "DAA", "JR Z,n", "ADD HL,HL", "LDI A,(HL)", "DEC HL", "INC L", "DEC L", "LD L,n", "CPL",
+//            "JR NC,n", "LD SP,nn", "LDD (HL),A", "INC SP", "INC (HL)", "DEC (HL)", "LD (HL),n", "SCF", "JR C,n", "ADD HL,SP", "LDD A,(HL)", "DEC SP", "INC A", "DEC A", "LD A,n", "CCF",
+//            "LD B,B", "LD B,C", "LD B,D", "LD B,E", "LD B,H", "LD B,L", "LD B,(HL)", "LD B,A", "LD C,B", "LD C,C", "LD C,D", "LD C,E", "LD C,H", "LD C,L", "LD C,(HL)", "LD C,A",
+//            "LD D,B", "LD D,C", "LD D,D", "LD D,E", "LD D,H", "LD D,L", "LD D,(HL)", "LD D,A", "LD E,B", "LD E,C", "LD E,D", "LD E,E", "LD E,H", "LD E,L", "LD E,(HL)", "LD E,A",
+//            "LD H,B", "LD H,C", "LD H,D", "LD H,E", "LD H,H", "LD H,L", "LD H,(HL)", "LD H,A", "LD L,B", "LD L,C", "LD L,D", "LD L,E", "LD L,H", "LD L,L", "LD L,(HL)", "LD L,A",
+//            "LD (HL),B", "LD (HL),C", "LD (HL),D", "LD (HL),E", "LD (HL),H", "LD (HL),L", "HALT", "LD (HL),A", "LD A,B", "LD A,C", "LD A,D", "LD A,E", "LD A,H", "LD A,L", "LD A,(HL)", "LD A,A",
+//            "ADD A,B", "ADD A,C", "ADD A,D", "ADD A,E", "ADD A,H", "ADD A,L", "ADD A,(HL)",  "ADD A,A", "ADC A,B", "ADC A,C", "ADC A,D", "ADC A,E", "ADC A,H", "ADC A,L", "ADC A,(HL)", "ADC A,A",
+//            "SUB A,B", "SUB A,C", "SUB A,D", "SUB A,E", "SUB A,H", "SUB A,L", "SUB A,(HL)",  "SUB A,A", "SBC A,B", "SBC A,C", "SBC A,D", "SBC A,E", "SBC A,H", "SBC A,L", "SBC A,(HL)", "SBC A,A",
+//            "AND B", "AND C", "AND D", "AND E", "AND H", "AND L", "AND (HL)", "AND A", "XOR B", "XOR C", "XOR D", "XOR E", "XOR H", "XOR L", "XOR (HL)", "XOR A",
+//            "OR B", "OR C", "OR D", "OR E", "OR H", "OR L", "OR (HL)", "OR A", "CP B", "CP C", "CP D", "CP E", "CP H", "CP L", "CP (HL)", "CP A",
+//            "RET NZ", "POP BC", "JP NZ,nn", "JP nn", "CALL NZ,nn", "PUSH BC", "ADD A,n", "RST 0", "RET Z", "RET", "JP Z,nn", "Ext ops", "CALL Z,nn", "CALL nn", "ADC A,n", "RST 8",
+//            "RET NC", "POP DE", "JP NC,nn", "XX", "CALL NC,nn", "PUSH DE", "SUB A,n", "RST 10", "RET C", "RETI", "JP C,nn", "XX", "CALL C,nn", "XX", "SBC A,n", "RST 18",
+//            "LDH (n),A", "POP HL", "LDH (C),A", "XX", "XX", "PUSH HL", "AND n", "RST 20", "ADD SP,d", "JP (HL)", "LD (nn),A", "XX", "XX", "XX", "XOR n", "RST 28",
+//            "LDH A,(n)", "POP AF", "XX", "DI", "XX", "PUSH AF", "OR n", "RST 30", "LDHL SP,d", "LD SP,HL", "LD A,(nn)", "EI", "XX", "XX", "CP n", "RST 38" 
+//   };
 }

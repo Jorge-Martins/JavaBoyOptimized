@@ -10,8 +10,6 @@ public class INC_R extends Instruction{
          
    @Override
    public void execute(int b1, int b2, int b3, int offset){
-      loadRegisters();
-      
       dmgcpu.pc++;
       dmgcpu.f &= dmgcpu.F_CARRY;
       
@@ -29,7 +27,5 @@ public class INC_R extends Instruction{
             break;
    
       }
-      
-      storeRegisters();
    }
 }

@@ -84,25 +84,25 @@ New Features
 */
 
 import java.awt.*;
-import java.awt.image.*;
-import java.lang.*;
+//import java.awt.image.*;
+//import java.lang.*;
 import java.io.*;
-import java.applet.*;
+//import java.applet.*;
 import java.net.*;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowListener;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentListener;
+//import java.awt.event.ComponentListener;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.ActionEvent;
-import java.awt.event.ComponentEvent;
+//import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseEvent;
 import java.util.StringTokenizer;
-import javax.sound.sampled.*;
+//import javax.sound.sampled.*;
 
 /** This is the main controlling class which contains the main() method
  *  to run JavaBoy as an application, and also the necessary applet methods.
@@ -113,9 +113,12 @@ import javax.sound.sampled.*;
 
 public class JavaBoy extends java.applet.Applet implements Runnable, KeyListener, WindowListener,
          MouseListener, ActionListener, ItemListener {
-   
-   private final int WIDTH = 160;
-   private final int HEIGHT = 144;
+   /**
+    * 
+    */
+   private static final long serialVersionUID = 2420583206016542966L;
+   private final int a = 7, b = 0, c = 1, d = 2, e = 3;
+
    private final String WEBSITE_URL = "http://www.millstone.demon.co.uk/download/javaboy";
    private static final String hexChars = "0123456789ABCDEF";
 
@@ -124,8 +127,7 @@ public class JavaBoy extends java.applet.Applet implements Runnable, KeyListener
 
    private boolean appletRunning = true;
    public static boolean runningAsApplet;
-   private Image backBuffer;
-   private boolean gameRunning;
+
    private boolean fullFrame = true;
 
    private boolean saveToWebEnable = false;
@@ -624,9 +626,9 @@ public class JavaBoy extends java.applet.Applet implements Runnable, KeyListener
    /** Output the current register values to the console */
    public void showRegisterValues() {
       System.out.println("- Register values");
-      System.out.print("A = " + JavaBoy.hexWord(dmgcpu.a) + "    BC = " + JavaBoy.hexWord(dmgcpu.b)
-               + JavaBoy.hexWord(dmgcpu.c));
-      System.out.print("    DE = " + JavaBoy.hexByte(dmgcpu.d) + JavaBoy.hexByte(dmgcpu.e));
+      System.out.print("A = " + JavaBoy.hexWord(dmgcpu.registers[a]) + "    BC = " + JavaBoy.hexWord(dmgcpu.registers[b])
+               + JavaBoy.hexWord(dmgcpu.registers[c]));
+      System.out.print("    DE = " + JavaBoy.hexByte(dmgcpu.registers[d]) + JavaBoy.hexByte(dmgcpu.registers[e]));
       System.out.print("    HL = " + JavaBoy.hexWord(dmgcpu.hl));
       System.out.print("    PC = " + JavaBoy.hexWord(dmgcpu.pc));
       System.out.println("    SP = " + JavaBoy.hexWord(dmgcpu.sp));

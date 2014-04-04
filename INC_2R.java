@@ -11,8 +11,6 @@ public class INC_2R extends Instruction{
    
    @Override
    public void execute(int b1, int b2, int b3, int offset){
-      loadRegisters();
-      
       dmgcpu.pc++;
       dmgcpu.registers[reg2]++;
       
@@ -24,7 +22,5 @@ public class INC_2R extends Instruction{
             dmgcpu.registers[reg1] = 0;
          }
       }
-      
-      storeRegisters();
    }
 }

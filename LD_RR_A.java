@@ -16,13 +16,11 @@ public class LD_RR_A extends Instruction{
    
    @Override
    public void execute(int b1, int b2, int b3, int offset){
-      loadRegisters();
-      
       dmgcpu.pc++;
       if(type.equals("bc")){
-         dmgcpu.addressWrite((dmgcpu.b << 8) | dmgcpu.c, dmgcpu.a);
+         dmgcpu.addressWrite(((dmgcpu.registers[b]) << 8) | (dmgcpu.registers[c]), dmgcpu.registers[a]);
       } else{
-         dmgcpu.addressWrite((dmgcpu.d << 8) + dmgcpu.e, dmgcpu.a);
+         dmgcpu.addressWrite(((dmgcpu.registers[d]) << 8) + (dmgcpu.registers[e]), dmgcpu.registers[a]);
       }
    }
 }

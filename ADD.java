@@ -12,7 +12,6 @@ public class ADD extends Instruction{
    
    private void setAddress(){
       if(type.equals("rr")){
-         loadRegisters();
          address = (dmgcpu.hl + ((dmgcpu.registers[reg1] << 8) + dmgcpu.registers[reg2]));
       } else if(type.equals("hl")){
          
