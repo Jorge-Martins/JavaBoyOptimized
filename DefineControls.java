@@ -53,6 +53,7 @@ public class DefineControls extends Frame implements KeyListener, WindowListener
 
    Hashtable<Integer, String> keyNames;
 
+   @SuppressWarnings("deprecation")
    public DefineControls() {
       super("Define Controls");
 
@@ -147,6 +148,7 @@ public class DefineControls extends Frame implements KeyListener, WindowListener
    public void windowClosed(WindowEvent e) {
    }
 
+   @SuppressWarnings("deprecation")
    public void windowClosing(WindowEvent e) {
       hide();
    }
@@ -166,6 +168,7 @@ public class DefineControls extends Frame implements KeyListener, WindowListener
    public void windowDeactivated(WindowEvent e) {
    }
 
+   @SuppressWarnings("deprecation")
    public void actionPerformed(ActionEvent e) {
       hide();
    }

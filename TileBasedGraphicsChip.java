@@ -112,7 +112,8 @@ class TileBasedGraphicsChip extends GraphicsChip {
  }
 
  /** Draw sprites into the back buffer which have the given priority */
- public void drawSprites(Graphics back, int priority) {
+ @SuppressWarnings("unused")
+public void drawSprites(Graphics back, int priority) {
   
   int tileBankStart = 0;
   int vidRamAddress = 0;
@@ -558,7 +559,8 @@ class TileBasedGraphicsChip extends GraphicsChip {
   /** Create the image of a tile in the tile cache by reading the relevant data from video
    *  memory
    */
-  public void updateImage(byte[] videoRam, int offset, int attribs) {
+  @SuppressWarnings("unused")
+public void updateImage(byte[] videoRam, int offset, int attribs) {
    int px, py;
    int rgbValue;
  

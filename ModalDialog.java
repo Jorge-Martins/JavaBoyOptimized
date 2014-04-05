@@ -57,6 +57,7 @@ class ModalDialog implements ActionListener {
    DialogListener listener;
 
    /** Create a dialog box with the specified title and body text */
+   @SuppressWarnings("deprecation")
    public ModalDialog(Frame parent, String title, String text, String text2) {
       this.yesNo = false;
       if (parent == null) {
@@ -76,6 +77,7 @@ class ModalDialog implements ActionListener {
       finished = false;
    }
 
+   @SuppressWarnings("deprecation")
    public ModalDialog(Frame parent, String title, String text, DialogListener listener) {
       this.yesNo = true;
       this.listener = listener;
@@ -112,6 +114,7 @@ class ModalDialog implements ActionListener {
       return finished;
    }
 
+   @SuppressWarnings("deprecation")
    public void actionPerformed(ActionEvent e) {
       result = !e.getActionCommand().equals("No");
       if (yesNo) {

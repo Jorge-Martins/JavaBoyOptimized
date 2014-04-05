@@ -94,6 +94,7 @@ class GameBoyPrinter extends GameLink {
 
    };
 
+   @SuppressWarnings("deprecation")
    GameBoyPrinter() {
       window = new GameBoyPrinterWindow("Game Boy Printer");
 
@@ -241,6 +242,7 @@ class GameBoyPrinter extends GameLink {
 
    }
 
+   @SuppressWarnings("deprecation")
    void shutDown() {
       window.hide();
    }

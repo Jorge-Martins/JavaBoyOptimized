@@ -22,30 +22,35 @@ Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 import java.awt.*;
-import java.awt.image.*;
-import java.lang.*;
-import java.io.*;
-import java.applet.*;
-import java.net.*;
-import java.awt.event.KeyListener;
-import java.awt.event.WindowListener;
+//import java.awt.image.*;
+//import java.lang.*;
+//import java.io.*;
+//import java.applet.*;
+//import java.net.*;
+//import java.awt.event.KeyListener;
+//import java.awt.event.WindowListener;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentListener;
 import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
+//import java.awt.event.KeyEvent;
+//import java.awt.event.WindowEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
-import java.util.StringTokenizer;
-import java.util.Hashtable;
-import javax.sound.sampled.*;
+//import java.util.StringTokenizer;
+//import java.util.Hashtable;
+//
+//import javax.sound.sampled.*;
 
 /** This class is used when JavaBoy is run as an application
  *  to provide the user interface.
  */
 
 class GameBoyScreen extends Frame implements ActionListener, ComponentListener, ItemListener {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = 1247566710577634056L;
    GraphicsChip       graphicsChip = null;
    JavaBoy            applet;
 
@@ -361,6 +366,7 @@ class GameBoyScreen extends Frame implements ActionListener, ComponentListener, 
    }
 
    /** Creates a connection dialog for Game Link connections */
+   @SuppressWarnings("deprecation")
    public void makeConnectDialog() {
       connectDialog = new Dialog(this, "Game Link connect", true);
       Panel p1 = new Panel();
@@ -530,6 +536,7 @@ class GameBoyScreen extends Frame implements ActionListener, ComponentListener, 
       }
    }
 
+   @SuppressWarnings("deprecation")
    public void actionPerformed(ActionEvent e) {
       String command = e.getActionCommand();
       // System.out.println("Command: " + command);
@@ -880,6 +887,7 @@ class GameBoyScreen extends Frame implements ActionListener, ComponentListener, 
          Dimension d = getSize();
          int x = (d.width / 2) - (graphicsChip.width / 2);
          int y = (d.height / 2) - (graphicsChip.height / 2);
+         @SuppressWarnings("unused")
          boolean b = graphicsChip.draw(g, x, y + 20, this);
          if (viewFrameCounter.getState()) {
             g.setColor(new Color(255, 255, 255));

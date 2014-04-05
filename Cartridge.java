@@ -925,6 +925,7 @@ class WebSaveRAM implements Runnable, DialogListener {
    Dmgcpu cpu;
    String username;
 
+   @SuppressWarnings("unused")
    public WebSaveRAM(URL url, boolean save, Cartridge cart, Dmgcpu cpu, String username) {
       this.url = url;
       this.save = save;
@@ -956,6 +957,7 @@ class WebSaveRAM implements Runnable, DialogListener {
       // Object deleted now
    }
 
+   @SuppressWarnings("deprecation")
    public void run() {
       Frame f = new Frame("Please Wait...");
       f.setSize(200, 120);
@@ -985,6 +987,7 @@ class WebSaveRAM implements Runnable, DialogListener {
       f.hide();
    }
 
+   @SuppressWarnings("deprecation")
    public void saveRam() throws Exception {
       // if (username == null) throw new Exception("No username provided");
 
@@ -1040,6 +1043,7 @@ class WebSaveRAM implements Runnable, DialogListener {
       System.out.println("OK!");
    }
 
+   @SuppressWarnings("deprecation")
    public void loadRam() throws Exception {
       // if (username == null) throw new Exception("No username provided");
 

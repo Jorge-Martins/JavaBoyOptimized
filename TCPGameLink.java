@@ -148,7 +148,8 @@ class TCPGameLink extends GameLink implements Runnable {
     }
 
 
-    int data = 0, clock, initial, b1, b2, b3, b4, v = 0;
+    @SuppressWarnings("unused")
+   int data = 0, clock, initial, b1, b2, b3, b4, v = 0;
     while ((data != -1) && (!terminate)) {           /* This needs to terminate */
 
      if (dmgcpu != null) {
