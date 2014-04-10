@@ -1,8 +1,8 @@
 all:
-	javac -O *.java
+	javac -O ./*/*.java
 
 clean:
-	rm *.class
+	rm ./*/*.class
 
 run:
-	java JavaBoy
+	java Emulator.JavaBoy
