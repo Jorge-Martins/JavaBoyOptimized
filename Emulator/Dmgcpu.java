@@ -24,26 +24,10 @@ Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 package Emulator;
-import Instructions.InstructionManager;
 
+import Instructions.InstructionManager;
 import java.awt.*;
-//import java.awt.image.*;
-//import java.lang.*;
 import java.io.*;
-//import java.applet.*;
-//import java.net.*;
-//import java.awt.event.KeyListener;
-//import java.awt.event.WindowListener;
-//import java.awt.event.ActionListener;
-//import java.awt.event.ComponentListener;
-//import java.awt.event.ItemListener;
-//import java.awt.event.KeyEvent;
-//import java.awt.event.WindowEvent;
-//import java.awt.event.ActionEvent;
-//import java.awt.event.ComponentEvent;
-//import java.awt.event.ItemEvent;
-//import java.util.*;
-//import javax.sound.sampled.*;
 
 
 /** This is the main controlling class for the emulation
@@ -152,14 +136,14 @@ public class Dmgcpu {
    Component applet;
    InstructionManager instructionManager;
    
-   boolean terminate;
+   public boolean terminate;
    boolean running = false;
 
    public boolean gbcFeatures = true;
    boolean allowGbcFeatures = true;
    int gbcRamBank = 1;
 
- //time between checkpoints in milliseconds 
+   //time between checkpoints in milliseconds 
    long checkpointTime = 120000; 
    
    long initialTime;
@@ -178,7 +162,6 @@ public class Dmgcpu {
 
       String version = System.getProperty("java.version");
 
-      // Sound not supported until Java 1.2
       java1point3 = !((version.startsWith("1.0") || version.startsWith("1.1")));
 
       if (java1point3) {
@@ -188,10 +171,8 @@ public class Dmgcpu {
       applet = a;
       initialTime = System.currentTimeMillis();
       instructionManager = new InstructionManager(this);
-      // reset();
    }
 
-   // New stuff >>>>> TODO
    private void saveData(DataOutputStream sv, String directory) {
       try {
          // 8 bit registers
@@ -343,8 +324,7 @@ public class Dmgcpu {
       
       System.out.println("Loaded stage!");
    }
-   // <<<<<<<<<<<<<<<<
-
+   
    /** Clear up memory */
    public void dispose() {
       graphicsChip.dispose();
@@ -684,13 +664,11 @@ public class Dmgcpu {
    /** Initiate an interrupt of the specified type */
    public final void triggerInterrupt(int intr) {
       ioHandler.registers[0x0F] |= intr;
-      // System.out.println("Triggered:" + intr);
    }
 
    public final void triggerInterruptIfEnabled(int intr) {
       if ((ioHandler.registers[0xFF] & (short) (intr)) != 0)
          ioHandler.registers[0x0F] |= intr;
-      // System.out.println("Triggered:" + intr);
    }
 
    /** Check for interrupts that need to be initiated */
@@ -721,8 +699,6 @@ public class Dmgcpu {
                   && ((ioHandler.registers[0x41] & 64) != 0)
                   && (JavaBoy.unsign(ioHandler.registers[0x45]) == cline)
                   && ((ioHandler.registers[0x40] & 0x80) != 0) && (cline < 0x90)) {
-            // System.out.println("Hblank " + cline);
-            // System.out.println("** LCDC Int **");
             triggerInterrupt(INT_LCDC);
          }
 
@@ -730,7 +706,6 @@ public class Dmgcpu {
          if (((ioHandler.registers[0xFF] & INT_LCDC) != 0)
                   && ((ioHandler.registers[0x41] & 0x8) != 0)
                   && ((ioHandler.registers[0x40] & 0x80) != 0) && (cline < 0x90)) {
-            // System.out.println("** LCDC Int **");
             triggerInterrupt(INT_LCDC);
          }
 
@@ -739,7 +714,6 @@ public class Dmgcpu {
          }
 
          if (JavaBoy.unsign(ioHandler.registers[0x44]) == 143) {
-            // System.out.println("VBLANK!");
             for (int r = 144; r < 170; r++) {
                graphicsChip.notifyScanline(r);
             }
@@ -749,7 +723,6 @@ public class Dmgcpu {
                if (((ioHandler.registers[0x41] & 16) != 0)
                         && ((ioHandler.registers[0xFF] & INT_LCDC) != 0)) {
                   triggerInterrupt(INT_LCDC);
-                  // System.out.println("VBlank LCDC!");
                }
             }
 
@@ -759,8 +732,6 @@ public class Dmgcpu {
                speedThrottle = g.viewSpeedThrottle.getState();
             }
             if ((speedThrottle) && (graphicsChip.frameWaitTime >= 0)) {
-               // System.out.println("Waiting for " + graphicsChip.frameWaitTime
-               // + "ms.");
                try {
                   java.lang.Thread.sleep(graphicsChip.frameWaitTime);
                } catch (InterruptedException e) {
@@ -774,8 +745,6 @@ public class Dmgcpu {
          ioHandler.registers[0x44] = (byte) (JavaBoy.unsign(ioHandler.registers[0x44]) + 1);
          
          if (JavaBoy.unsign(ioHandler.registers[0x44]) >= 153) {
-            // System.out.println("VBlank");
-
             ioHandler.registers[0x44] = 0;
             if (soundChip != null)
                soundChip.outputSound();
@@ -792,11 +761,10 @@ public class Dmgcpu {
             } catch (InterruptedException e) {
                // Nothing.
             }
-
-            // System.out.println("LCDC reset");
          }
       }
    }
+   
    //private Map<Integer, Integer> map = new HashMap<Integer, Integer>();
    /**
     * Execute the specified number of Gameboy instructions. Use '-1' to execute
@@ -818,14 +786,6 @@ public class Dmgcpu {
             saveCheckpointInterrupt = true;
          }
          
-         /*
-          * GameBoyScreen j = (GameBoyScreen) applet; if
-          * (j.viewFrameCounter.getState()) { System.out.print(" " +
-          * JavaBoy.hexWord(pc) + ":" + JavaBoy.hexByte(cartridge.currentBank));
-          * }
-          */
-         // System.out.print(" " + JavaBoy.hexWord(pc) + ":" +
-         // JavaBoy.hexByte(cartridge.currentBank));
          instrCount++;
 
          b1 = JavaBoy.unsign(addressRead(pc));
@@ -895,9 +855,6 @@ public class Dmgcpu {
                   }
                   f = newf;
                   break;
-               case 0x18: // JR nn
-                  pc += 2 + offset;
-                  break;
                case 0x1F: // RR A
                   pc++;
                   if (((registers[a]) & 0x01) == 0x01) {
@@ -915,13 +872,6 @@ public class Dmgcpu {
                      newf |= F_ZERO;
                   }
                   f = newf;
-                  break;
-               case 0x20: // JR NZ, nn
-                  if ((f & 0x80) == 0x00) {
-                     pc += 2 + offset;
-                  } else {
-                     pc += 2;
-                  }
                   break;
                case 0x21: // LD HL, nnnn
                   pc += 3;
@@ -984,8 +934,6 @@ public class Dmgcpu {
 
                   int upperNibble = ((registers[a]) & 0xF0) >> 4;
                   int lowerNibble = (registers[a]) & 0x0F;
-
-                  // System.out.println("Daa at " + JavaBoy.hexWord(pc));
 
                   newf = (short) (f & F_SUBTRACT);
 
@@ -1073,13 +1021,6 @@ public class Dmgcpu {
                   f = newf;
 
                   break;
-               case 0x28: // JR Z, nn
-                  if ((f & F_ZERO) == F_ZERO) {
-                     pc += 2 + offset;
-                  } else {
-                     pc += 2;
-                  }
-                  break;
                case 0x2A: // LDI A, (HL)
                   pc++;
                   registers[a] = JavaBoy.unsign(addressRead(hl));
@@ -1141,13 +1082,6 @@ public class Dmgcpu {
                   
                   registers[a] = (short) ((~(registers[a])) & 0x00FF);
                   f = (short) ((f & (F_CARRY | F_ZERO)) | F_SUBTRACT | F_HALFCARRY);
-                  break;
-               case 0x30: // JR NC, nn
-                  if ((f & F_CARRY) == 0) {
-                     pc += 2 + offset;
-                  } else {
-                     pc += 2;
-                  }
                   break;
                case 0x31: // LD SP, nnnn
                   pc += 3;
@@ -1212,13 +1146,6 @@ public class Dmgcpu {
                   f &= F_ZERO;
                   f |= F_CARRY;
                   break;
-               case 0x38: // JR C, nn
-                  if ((f & F_CARRY) == F_CARRY) {
-                     pc += 2 + offset;
-                  } else {
-                     pc += 2;
-                  }
-                  break;
                case 0x3A: // LD A, (HL-)
                   pc++;
                   registers[a] = JavaBoy.unsign(addressRead(hl));
@@ -1266,16 +1193,6 @@ public class Dmgcpu {
                   registers[c] = JavaBoy.unsign(addressRead(sp));
                   registers[b] = JavaBoy.unsign(addressRead(sp + 1));
                   sp += 2;
-                  break;
-               case 0xC2: // JP NZ, nnnn
-                  if ((f & F_ZERO) == 0) {
-                     pc = (b3 << 8) + b2;
-                  } else {
-                     pc += 3;
-                  }
-                  break;
-               case 0xC3:
-                  pc = (b3 << 8) + b2; // JP nnnn
                   break;
                case 0xC4: // CALL NZ, nnnnn
                   if ((f & F_ZERO) == 0) {
@@ -1336,13 +1253,6 @@ public class Dmgcpu {
                case 0xC9: // RET
                   pc = (JavaBoy.unsign(addressRead(sp + 1)) << 8) + JavaBoy.unsign(addressRead(sp));
                   sp += 2;
-                  break;
-               case 0xCA: // JP Z, nnnn
-                  if ((f & F_ZERO) == F_ZERO) {
-                     pc = (b3 << 8) + b2;
-                  } else {
-                     pc += 3;
-                  }
                   break;
                case 0xCC: // CALL Z, nnnnn
                   if ((f & F_ZERO) == F_ZERO) {
@@ -1411,13 +1321,6 @@ public class Dmgcpu {
                   registers[d] = JavaBoy.unsign(addressRead(sp + 1));
                   sp += 2;
                   break;
-               case 0xD2: // JP NC, nnnn
-                  if ((f & F_CARRY) == 0) {
-                     pc = (b3 << 8) + b2;
-                  } else {
-                     pc += 3;
-                  }
-                  break;
                case 0xD4: // CALL NC, nnnn
                   if ((f & F_CARRY) == 0) {
                      pc += 3;
@@ -1476,13 +1379,6 @@ public class Dmgcpu {
                   inInterrupt = false;
                   pc = (JavaBoy.unsign(addressRead(sp + 1)) << 8) + JavaBoy.unsign(addressRead(sp));
                   sp += 2;
-                  break;
-               case 0xDA: // JP C, nnnn
-                  if ((f & F_CARRY) == F_CARRY) {
-                     pc = (b3 << 8) + b2;
-                  } else {
-                     pc += 3;
-                  }
                   break;
                case 0xDC: // CALL C, nnnn
                   if ((f & F_CARRY) == F_CARRY) {
@@ -1649,8 +1545,6 @@ public class Dmgcpu {
                case 0xFB: // EI
                   pc++;
                   ieDelay = 1;
-                  // interruptsEnabled = true;
-                  // addressWrite(0xFFFF, 0xFF);
                   break;
                case 0xFE: // CP nn ** FLAGS ARE WRONG! **
                   pc += 2;
@@ -1697,11 +1591,6 @@ public class Dmgcpu {
          cartridge.update();
 
          initiateInterrupts();
-
-         /*
-          * if ((hl & 0xFFFF0000) != 0) { terminate = true;
-          * System.out.println("Overflow in HL!"); }
-          */
 
          if(saveInterrupt){
             saveState(".stsv");

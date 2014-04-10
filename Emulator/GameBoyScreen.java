@@ -220,7 +220,6 @@ class GameBoyScreen extends Frame implements ActionListener, ComponentListener, 
       soundFreq44.addItemListener(this);
       soundFreq44.setState(true);
 
-      // TODO >>>>>>>
       soundVolume100 = new CheckboxMenuItem("Volume: 100%");
       soundVolume100.addItemListener(this);
       soundVolume100.setState(true);
@@ -258,7 +257,6 @@ class GameBoyScreen extends Frame implements ActionListener, ComponentListener, 
       networkPrinter = new CheckboxMenuItem("Emulate printer");
       networkPrinter.addItemListener(this);
 
-      // TODO >>>>>>>
       MenuItem emulationSaveState = new MenuItem("Save State");
       emulationSaveState.setActionCommand("Save State");
       emulationSaveState.addActionListener(this);
@@ -642,8 +640,7 @@ class GameBoyScreen extends Frame implements ActionListener, ComponentListener, 
       } else if (command.equals("Exit")) {
          applet.dispose();
          System.exit(0);
-         
-         //New Stuff TODO>>>>>
+
       } else if (command.equals("Save State")){
          if (applet.dmgcpu != null) {
             applet.dmgcpu.saveInterrupt = true;
@@ -752,7 +749,6 @@ class GameBoyScreen extends Frame implements ActionListener, ComponentListener, 
          soundFreq44.setState(true);
          setSoundFreq();
 
-         // new stuff TODO >>>>
       } else if (command.equals("Volume: 100%")) {
          soundVolume100.setState(true);
          soundVolume75.setState(false);
