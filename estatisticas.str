@@ -1,33 +1,33 @@
 
 passados 2 minutos:
 15      8033    RRC A
-24      117416  JR n
-32      1363090 JR NZ,n
+24      117416  JR n			ok
+32      1363090 JR NZ,n			ok
 33      413309  LD HL,nn
 34      198365  LDI (HL),A
 35      349348  INC HL
 36      5245    INC H
 38      82479   LD H,n
-40      793535  JR Z,n
+40      793535  JR Z,n			ok
 42      196819  LDI A,(HL)
 44      143729  INC L
 47      13996   CPL
-48      226951  JR NC,n
+48      226951  JR NC,n			ok
 50      7147    LDD (HL),A
 53      14267   DEC (HL)
 54      15934   LD (HL),n
 55      16278   SCF
-56      239480  JR C,n
+56      239480  JR C,n			ok
 58      6065    LDD A,(HL)
 192     41599   RET NZ
 193     91264   POP BC
-194     147377  JP NZ,nn
-195     190097  JP nn
+194     147377  JP NZ,nn		ok
+195     190097  JP nn			ok
 197     76605   PUSH BC
 198     333587  ADD A,n
 200     98850   RET Z
 201     458168  RET
-202     214083  JP Z,nn
+202     214083  JP Z,nn			ok
 205     557654  CALL nn
 208     10174   RET NC
 209     122659  POP DE

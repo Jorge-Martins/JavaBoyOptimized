@@ -929,98 +929,6 @@ public class Dmgcpu {
                   pc += 2;
                   hl = (hl & 0x00FF) | (b2 << 8);
                   break;
-               case 0x27: // DAA ** This could be wrong! **
-                  pc++;
-
-                  int upperNibble = ((registers[a]) & 0xF0) >> 4;
-                  int lowerNibble = (registers[a]) & 0x0F;
-
-                  newf = (short) (f & F_SUBTRACT);
-
-                  if ((f & F_SUBTRACT) == 0) {
-
-                     if ((f & F_CARRY) == 0) {
-                        if ((upperNibble <= 8) && (lowerNibble >= 0xA) && ((f & F_HALFCARRY) == 0)) {
-                           registers[a] += 0x06;
-                        }
-
-                        if ((upperNibble <= 9) && (lowerNibble <= 0x3)
-                                 && ((f & F_HALFCARRY) == F_HALFCARRY)) {
-                           registers[a] += 0x06;
-                        }
-
-                        if ((upperNibble >= 0xA) && (lowerNibble <= 0x9)
-                                 && ((f & F_HALFCARRY) == 0)) {
-                           registers[a] += 0x60;
-                           newf |= F_CARRY;
-                        }
-
-                        if ((upperNibble >= 0x9) && (lowerNibble >= 0xA)
-                                 && ((f & F_HALFCARRY) == 0)) {
-                           registers[a] += 0x66;
-                           newf |= F_CARRY;
-                        }
-
-                        if ((upperNibble >= 0xA) && (lowerNibble <= 0x3)
-                                 && ((f & F_HALFCARRY) == F_HALFCARRY)) {
-                           registers[a] += 0x66;
-                           newf |= F_CARRY;
-                        }
-
-                     } else { // If carry set
-
-                        if ((upperNibble <= 0x2) && (lowerNibble <= 0x9)
-                                 && ((f & F_HALFCARRY) == 0)) {
-                           registers[a] += 0x60;
-                           newf |= F_CARRY;
-                        }
-
-                        if ((upperNibble <= 0x2) && (lowerNibble >= 0xA)
-                                 && ((f & F_HALFCARRY) == 0)) {
-                           registers[a] += 0x66;
-                           newf |= F_CARRY;
-                        }
-
-                        if ((upperNibble <= 0x3) && (lowerNibble <= 0x3)
-                                 && ((f & F_HALFCARRY) == F_HALFCARRY)) {
-                           registers[a] += 0x66;
-                           newf |= F_CARRY;
-                        }
-
-                     }
-
-                  } else { // Subtract is set
-
-                     if ((f & F_CARRY) == 0) {
-
-                        if ((upperNibble <= 0x8) && (lowerNibble >= 0x6)
-                                 && ((f & F_HALFCARRY) == F_HALFCARRY)) {
-                           registers[a] += 0xFA;
-                        }
-
-                     } else { // Carry is set
-
-                        if ((upperNibble >= 0x7) && (lowerNibble <= 0x9)
-                                 && ((f & F_HALFCARRY) == 0)) {
-                           registers[a] += 0xA0;
-                           newf |= F_CARRY;
-                        }
-
-                        if ((upperNibble >= 0x6) && (lowerNibble >= 0x6)
-                                 && ((f & F_HALFCARRY) == F_HALFCARRY)) {
-                           registers[a] += 0x9A;
-                           newf |= F_CARRY;
-                        }
-                     }
-                  }
-
-                  registers[a] &= 0x00FF;
-                  if (registers[a] == 0)
-                     newf |= F_ZERO;
-
-                  f = newf;
-
-                  break;
                case 0x2A: // LDI A, (HL)
                   pc++;
                   registers[a] = JavaBoy.unsign(addressRead(hl));
@@ -1048,28 +956,6 @@ public class Dmgcpu {
                         break;
                      default:
                         hl++;
-                        break;
-                  }
-                  break;
-               case 0x2D: // DEC L
-                  pc++;
-                  f &= F_CARRY;
-                  f |= F_SUBTRACT;
-                  switch (hl & 0x00FF) {
-                     case 0x00:
-                        f |= F_HALFCARRY;
-                        hl = (hl & 0xFF00) | 0x00FF;
-                        break;
-                     case 0x10:
-                        f |= F_HALFCARRY;
-                        hl = (hl & 0xFF00) | 0x000F;
-                        break;
-                     case 0x01:
-                        f |= F_ZERO;
-                        hl = (hl & 0xFF00);
-                        break;
-                     default:
-                        hl = (hl & 0xFF00) | ((hl & 0x00FF) - 1);
                         break;
                   }
                   break;
@@ -1179,31 +1065,11 @@ public class Dmgcpu {
                   registers[a] = 0;
                   f = 0x80; // Set zero flag
                   break;
-               case 0xC0: // RET NZ
-                  if ((f & F_ZERO) == 0) {
-                     pc = (JavaBoy.unsign(addressRead(sp + 1)) << 8)
-                              + JavaBoy.unsign(addressRead(sp));
-                     sp += 2;
-                  } else {
-                     pc++;
-                  }
-                  break;
                case 0xC1: // POP BC
                   pc++;
                   registers[c] = JavaBoy.unsign(addressRead(sp));
                   registers[b] = JavaBoy.unsign(addressRead(sp + 1));
                   sp += 2;
-                  break;
-               case 0xC4: // CALL NZ, nnnnn
-                  if ((f & F_ZERO) == 0) {
-                     pc += 3;
-                     sp -= 2;
-                     addressWrite(sp + 1, pc >> 8);
-                     addressWrite(sp, pc & 0x00FF);
-                     pc = (b3 << 8) + b2;
-                  } else {
-                     pc += 3;
-                  }
                   break;
                case 0xC5: // PUSH BC
                   pc++;
@@ -1241,37 +1107,6 @@ public class Dmgcpu {
                   addressWrite(sp, pc & 0x00FF);
                   pc = 0x08;
                   break;
-               case 0xC8: // RET Z
-                  if ((f & F_ZERO) == F_ZERO) {
-                     pc = (JavaBoy.unsign(addressRead(sp + 1)) << 8)
-                              + JavaBoy.unsign(addressRead(sp));
-                     sp += 2;
-                  } else {
-                     pc++;
-                  }
-                  break;
-               case 0xC9: // RET
-                  pc = (JavaBoy.unsign(addressRead(sp + 1)) << 8) + JavaBoy.unsign(addressRead(sp));
-                  sp += 2;
-                  break;
-               case 0xCC: // CALL Z, nnnnn
-                  if ((f & F_ZERO) == F_ZERO) {
-                     pc += 3;
-                     sp -= 2;
-                     addressWrite(sp + 1, pc >> 8);
-                     addressWrite(sp, pc & 0x00FF);
-                     pc = (b3 << 8) + b2;
-                  } else {
-                     pc += 3;
-                  }
-                  break;
-               case 0xCD: // CALL nnnn
-                  pc += 3;
-                  sp -= 2;
-                  addressWrite(sp + 1, pc >> 8);
-                  addressWrite(sp, pc & 0x00FF);
-                  pc = (b3 << 8) + b2;
-                  break;
                case 0xCE: // ADC A, nn
                   pc += 2;
 
@@ -1306,31 +1141,11 @@ public class Dmgcpu {
                   // terminate = true;
                   pc = 0x00;
                   break;
-               case 0xD0: // RET NC
-                  if ((f & F_CARRY) == 0) {
-                     pc = (JavaBoy.unsign(addressRead(sp + 1)) << 8)
-                              + JavaBoy.unsign(addressRead(sp));
-                     sp += 2;
-                  } else {
-                     pc++;
-                  }
-                  break;
                case 0xD1: // POP DE
                   pc++;
                   registers[e] = JavaBoy.unsign(addressRead(sp));
                   registers[d] = JavaBoy.unsign(addressRead(sp + 1));
                   sp += 2;
-                  break;
-               case 0xD4: // CALL NC, nnnn
-                  if ((f & F_CARRY) == 0) {
-                     pc += 3;
-                     sp -= 2;
-                     addressWrite(sp + 1, pc >> 8);
-                     addressWrite(sp, pc & 0x00FF);
-                     pc = (b3 << 8) + b2;
-                  } else {
-                     pc += 3;
-                  }
                   break;
                case 0xD5: // PUSH DE
                   pc++;
@@ -1365,31 +1180,11 @@ public class Dmgcpu {
                   addressWrite(sp, pc & 0x00FF);
                   pc = 0x10;
                   break;
-               case 0xD8: // RET C
-                  if ((f & F_CARRY) == F_CARRY) {
-                     pc = (JavaBoy.unsign(addressRead(sp + 1)) << 8)
-                              + JavaBoy.unsign(addressRead(sp));
-                     sp += 2;
-                  } else {
-                     pc++;
-                  }
-                  break;
                case 0xD9: // RETI
                   interruptsEnabled = true;
                   inInterrupt = false;
                   pc = (JavaBoy.unsign(addressRead(sp + 1)) << 8) + JavaBoy.unsign(addressRead(sp));
                   sp += 2;
-                  break;
-               case 0xDC: // CALL C, nnnn
-                  if ((f & F_CARRY) == F_CARRY) {
-                     pc += 3;
-                     sp -= 2;
-                     addressWrite(sp + 1, pc >> 8);
-                     addressWrite(sp, pc & 0x00FF);
-                     pc = (b3 << 8) + b2;
-                  } else {
-                     pc += 3;
-                  }
                   break;
                case 0xDE: // SBC A, nn
                   pc += 2;
@@ -1584,14 +1379,6 @@ public class Dmgcpu {
 
          }
 
-         if (interruptsEnabled) {
-            checkInterrupts();
-         }
-
-         cartridge.update();
-
-         initiateInterrupts();
-
          if(saveInterrupt){
             saveState(".stsv");
             saveInterrupt = false;
@@ -1608,6 +1395,13 @@ public class Dmgcpu {
             loadState(".cksv");
             loadCheckpointInterrupt = false;
          }
+         
+         if (interruptsEnabled) {
+            checkInterrupts();
+         }
+         cartridge.update();
+         initiateInterrupts();
+         
       }
       running = false;
       terminate = false;
