@@ -70,9 +70,7 @@ class ADD_A extends ALUInstruction{
          dmgcpu.f |= dmgcpu.F_ZERO;
       }
 
-      if (((dmgcpu.registers[a]) & 0xFF00) != 0) { // Perform 8-bit overflow
-                               // and
-                               // set zero flag
+      if (((dmgcpu.registers[a]) & 0xFF00) != 0) { 
          if (dmgcpu.registers[a] == 0x0100) {
             dmgcpu.f |= dmgcpu.F_ZERO + dmgcpu.F_CARRY + dmgcpu.F_HALFCARRY;
             dmgcpu.registers[a] = 0;

@@ -760,73 +760,6 @@ public class Dmgcpu {
          //stats.addExecution(b1);
          if(!instructionManager.execute(b1, b2, b3, offset)){
             switch (b1) {
-               case 0x07: // RLC A
-                  pc++;
-                  f = 0;
-
-                  registers[a] <<= 1;
-
-                  if (((registers[a]) & 0x0100) != 0) {
-                     f |= F_CARRY;
-                     registers[a] |= 1;
-                     registers[a] &= 0xFF;
-                  }
-                  if (registers[a] == 0) {
-                     f |= F_ZERO;
-                  }
-                  break;
-               case 0x0F: // RRC A
-                  pc++;
-                  if (((registers[a]) & 0x01) == 0x01) {
-                     f = F_CARRY;
-                  } else {
-                     f = 0;
-                  }
-                  registers[a] >>= 1;
-                  if ((f & F_CARRY) == F_CARRY) {
-                     registers[a] |= F_ZERO;
-                  }
-                  if (registers[a] == 0) {
-                     f |= F_ZERO;
-                  }
-                  break;
-               case 0x17: // RL A
-                  pc++;
-                  if (((registers[a]) & F_ZERO) == F_ZERO) {
-                     newf = F_CARRY;
-                  } else {
-                     newf = 0;
-                  }
-                  registers[a] <<= 1;
-
-                  if ((f & F_CARRY) == F_CARRY) {
-                     registers[a] |= 1;
-                  }
-
-                  registers[a] &= 0xFF;
-                  if (registers[a] == 0) {
-                     newf |= F_ZERO;
-                  }
-                  f = newf;
-                  break;
-               case 0x1F: // RR A
-                  pc++;
-                  if (((registers[a]) & 0x01) == 0x01) {
-                     newf = F_CARRY;
-                  } else {
-                     newf = 0;
-                  }
-                  registers[a] >>= 1;
-
-                  if ((f & F_CARRY) == F_CARRY) {
-                     registers[a] |= F_ZERO;
-                  }
-
-                  if (registers[a] == 0) {
-                     newf |= F_ZERO;
-                  }
-                  f = newf;
-                  break;
                case 0x23: // INC HL
                   pc++;
                   hl = (hl + 1) & 0xFFFF;
@@ -928,127 +861,16 @@ public class Dmgcpu {
                      pc++;
                   }
                   break;
-               case 0xAF: // XOR A, A (== LD A, 0)
+               case 0xAF: // XOR A, A 
                   pc++;
                   registers[a] = 0;
                   f = F_ZERO;
-                  break;
-               case 0xC1: // POP BC
-                  pc++;
-                  registers[c] = JavaBoy.unsign(addressRead(sp));
-                  registers[b] = JavaBoy.unsign(addressRead(sp + 1));
-                  sp += 2;
-                  break;
-               case 0xC5: // PUSH BC
-                  pc++;
-                  sp -= 2;
-                  sp &= 0xFFFF;
-                  addressWrite(sp, registers[c]);
-                  addressWrite(sp + 1, registers[b]);
-                  break;
-               case 0xC6: // ADD A, nn
-                  pc += 2;
-                  f = 0;
-
-                  if (((((registers[a]) & 0x0F) + (b2 & 0x0F)) & 0xF0) != 0x00) {
-                     f |= F_HALFCARRY;
-                  }
-
-                  registers[a] += b2;
-
-                  if (((registers[a]) & 0xFF00) != 0) {
-                     if (registers[a] == 0x0100) {
-                        f |= F_ZERO + F_CARRY + F_HALFCARRY;
-                        registers[a] = 0;
-                     } else {
-                        f |= F_CARRY + F_HALFCARRY;
-                        (registers[a]) &= 0x00FF;
-                     }
-                  }
-                  break;
-               case 0xCE: // ADC A, nn
-                  pc += 2;
-
-                  if ((f & F_CARRY) != 0) {
-                     b2++;
-                  }
-                  f = 0;
-
-                  if (((((registers[a]) & 0x0F) + (b2 & 0x0F)) & 0xF0) != 0x00) {
-                     f |= F_HALFCARRY;
-                  }
-
-                  registers[a] += b2;
-
-                  if (((registers[a]) & 0xFF00) != 0) {
-                     if (registers[a] == 0x0100) {
-                        f |= F_ZERO + F_CARRY + F_HALFCARRY;
-                        registers[a] = 0;
-                     } else {
-                        f |= F_CARRY + F_HALFCARRY;
-                        registers[a] &= 0x00FF;
-                     }
-                  }
-                  break;
-               case 0xD1: // POP DE
-                  pc++;
-                  registers[e] = JavaBoy.unsign(addressRead(sp));
-                  registers[d] = JavaBoy.unsign(addressRead(sp + 1));
-                  sp += 2;
-                  break;
-               case 0xD5: // PUSH DE
-                  pc++;
-                  sp -= 2;
-                  sp &= 0xFFFF;
-                  addressWrite(sp, registers[e]);
-                  addressWrite(sp + 1, registers[d]);
-                  break;
-               case 0xD6: // SUB A, nn
-                  pc += 2;
-
-                  f = F_SUBTRACT;
-
-                  if (((((registers[a]) & 0x0F) - (b2 & 0x0F)) & 0xFFF0) != 0x00) {
-                     f |= F_HALFCARRY;
-                  }
-
-                  registers[a] -= b2;
-
-                  if (((registers[a]) & 0xFF00) != 0) {
-                     registers[a] &= 0x00FF;
-                     f |= F_CARRY;
-                  }
-                  if (registers[a] == 0) {
-                     f |= F_ZERO;
-                  }
                   break;
                case 0xD9: // RETI
                   interruptsEnabled = true;
                   inInterrupt = false;
                   pc = (JavaBoy.unsign(addressRead(sp + 1)) << 8) + JavaBoy.unsign(addressRead(sp));
                   sp += 2;
-                  break;
-               case 0xDE: // SBC A, nn
-                  pc += 2;
-                  if ((f & F_CARRY) != 0) {
-                     b2++;
-                  }
-
-                  f = F_SUBTRACT;
-                  if (((((registers[a]) & 0x0F) - (b2 & 0x0F)) & 0xFFF0) != 0x00) {
-                     f |= F_HALFCARRY;
-                  }
-
-                  registers[a] -= b2;
-
-                  if (((registers[a]) & 0xFF00) != 0) {
-                     registers[a] &= 0x00FF;
-                     f |= F_CARRY;
-                  }
-
-                  if (registers[a] == 0) {
-                     f |= F_ZERO;
-                  }
                   break;
                case 0xE0: // LDH (FFnn), A
                   pc += 2;
@@ -1070,15 +892,6 @@ public class Dmgcpu {
                   addressWrite(sp + 1, hl >> 8);
                   addressWrite(sp, hl & 0x00FF);
                   break;
-               case 0xE6: // AND nn
-                  pc += 2;
-                  registers[a] &= b2;
-                  if (registers[a] == 0) {
-                     f = F_ZERO;
-                  } else {
-                     f = 0;
-                  }
-                  break;
                case 0xE8: // ADD SP, nn
                   pc += 2;
                   sp = (sp + offset);
@@ -1096,15 +909,6 @@ public class Dmgcpu {
                case 0xEA: // LD (nnnn), A
                   pc += 3;
                   addressWrite((b3 << 8) + b2, registers[a]);
-                  break;
-               case 0xEE: // XOR A, nn
-                  pc += 2;
-                  registers[a] ^= b2;
-                  if (registers[a] == 0) {
-                     f = F_ZERO;
-                  } else {
-                     f = 0;
-                  }
                   break;
                case 0xF0: // LDH A, (FFnn)
                   pc += 2;
@@ -1127,15 +931,6 @@ public class Dmgcpu {
                   addressWrite(sp, f);
                   addressWrite(sp + 1, registers[a]);
                   break;
-               case 0xF6: // OR A, nn
-                  pc += 2;
-                  registers[a] |= b2;
-                  if (registers[a] == 0) {
-                     f = F_ZERO;
-                  } else {
-                     f = 0;
-                  }
-                  break;
                case 0xF8: // LD HL, SP + nn ** HALFCARRY FLAG NOT SET ***
                   pc += 2;
                   hl = (sp + offset);
@@ -1153,17 +948,6 @@ public class Dmgcpu {
                case 0xFB: // EI
                   pc++;
                   ieDelay = 1;
-                  break;
-               case 0xFE: // CP nn ** FLAGS ARE WRONG! **
-                  pc += 2;
-                  f = 0;
-                  if (b2 == registers[a]) {
-                     f |= F_ZERO;
-                  } else {
-                     if (registers[a] < b2) {
-                        f |= F_CARRY;
-                     }
-                  }
                   break;
 
                default:
