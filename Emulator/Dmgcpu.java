@@ -775,11 +775,6 @@ public class Dmgcpu {
                      f |= F_ZERO;
                   }
                   break;
-               case 0x08: // LD (nnnn), SP /* **** May be wrong! **** */
-                  pc += 3;
-                  addressWrite((b3 << 8) + b2 + 1, (sp & 0xFF00) >> 8);
-                  addressWrite((b3 << 8) + b2, (sp & 0x00FF));
-                  break;
                case 0x0F: // RRC A
                   pc++;
                   if (((registers[a]) & 0x01) == 0x01) {
@@ -789,7 +784,7 @@ public class Dmgcpu {
                   }
                   registers[a] >>= 1;
                   if ((f & F_CARRY) == F_CARRY) {
-                     registers[a] |= 0x80;
+                     registers[a] |= F_ZERO;
                   }
                   if (registers[a] == 0) {
                      f |= F_ZERO;
@@ -797,7 +792,7 @@ public class Dmgcpu {
                   break;
                case 0x17: // RL A
                   pc++;
-                  if (((registers[a]) & 0x80) == 0x80) {
+                  if (((registers[a]) & F_ZERO) == F_ZERO) {
                      newf = F_CARRY;
                   } else {
                      newf = 0;
@@ -824,7 +819,7 @@ public class Dmgcpu {
                   registers[a] >>= 1;
 
                   if ((f & F_CARRY) == F_CARRY) {
-                     registers[a] |= 0x80;
+                     registers[a] |= F_ZERO;
                   }
 
                   if (registers[a] == 0) {
@@ -832,57 +827,9 @@ public class Dmgcpu {
                   }
                   f = newf;
                   break;
-               case 0x21: // LD HL, nnnn
-                  pc += 3;
-                  hl = (b3 << 8) + b2;
-                  break;
-               case 0x22: // LD (HL+), A
-                  pc++;
-                  addressWrite(hl, registers[a]);
-                  hl = (hl + 1) & 0xFFFF;
-                  break;
                case 0x23: // INC HL
                   pc++;
                   hl = (hl + 1) & 0xFFFF;
-                  break;
-               case 0x24: // INC H ** May be wrong **
-                  pc++;
-                  f &= F_CARRY;
-                  switch ((hl & 0xFF00) >> 8) {
-                     case 0xFF:
-                        f |= F_HALFCARRY + F_ZERO;
-                        hl = (hl & 0x00FF);
-                        break;
-                     case 0x0F:
-                        f |= F_HALFCARRY;
-                        hl = (hl & 0x00FF) | 0x10;
-                        break;
-                     default:
-                        hl = (hl + 0x0100);
-                        break;
-                  }
-                  break;
-               case 0x25: // DEC H ** May be wrong **
-                  pc++;
-                  f &= F_CARRY;
-                  f |= F_SUBTRACT;
-                  switch ((hl & 0xFF00) >> 8) {
-                     case 0x00:
-                        f |= F_HALFCARRY;
-                        hl = (hl & 0x00FF) | (0xFF00);
-                        break;
-                     case 0x10:
-                        f |= F_HALFCARRY;
-                        hl = (hl & 0x00FF) | (0x0F00);
-                        break;
-                     case 0x01:
-                        f |= F_ZERO;
-                        hl = (hl & 0x00FF);
-                        break;
-                     default:
-                        hl = (hl & 0x00FF) | ((hl & 0xFF00) - 0x0100);
-                        break;
-                  }
                   break;
                case 0x2A: // LDI A, (HL)
                   pc++;
@@ -897,37 +844,10 @@ public class Dmgcpu {
                      hl--;
                   }
                   break;
-               case 0x2C: // INC L
-                  pc++;
-                  f &= F_CARRY;
-                  switch (hl & 0x00FF) {
-                     case 0xFF:
-                        f |= F_HALFCARRY + F_ZERO;
-                        hl = hl & 0xFF00;
-                        break;
-                     case 0x0F:
-                        f |= F_HALFCARRY;
-                        hl++;
-                        break;
-                     default:
-                        hl++;
-                        break;
-                  }
-                  break;
                case 0x2F: // CPL A
-                  pc++;
-                  
+                  pc++;            
                   registers[a] = (short) ((~(registers[a])) & 0x00FF);
                   f = (short) ((f & (F_CARRY | F_ZERO)) | F_SUBTRACT | F_HALFCARRY);
-                  break;
-               case 0x31: // LD SP, nnnn
-                  pc += 3;
-                  sp = (b3 << 8) + b2;
-                  break;
-               case 0x32: // LD (HL-), A
-                  pc++;
-                  addressWrite(hl, registers[a]); 
-                  hl--;
                   break;
                case 0x33: // INC SP
                   pc++;
@@ -1000,10 +920,7 @@ public class Dmgcpu {
                      f = (short) (f & F_ZERO);
                   }
                   break;
-               case 0x52: // Debug breakpoint (LD D, D)
-                  // As this insturction is used in games (why?) only break here
-                  // if
-                  // the breakpoint is on in the debugger
+               case 0x52: // LD D, D
                   if (breakpointEnable) {
                      terminate = true;
                      System.out.println("- Breakpoint reached");
@@ -1014,7 +931,7 @@ public class Dmgcpu {
                case 0xAF: // XOR A, A (== LD A, 0)
                   pc++;
                   registers[a] = 0;
-                  f = 0x80; // Set zero flag
+                  f = F_ZERO;
                   break;
                case 0xC1: // POP BC
                   pc++;
@@ -1039,9 +956,7 @@ public class Dmgcpu {
 
                   registers[a] += b2;
 
-                  if (((registers[a]) & 0xFF00) != 0) { // Perform 8-bit overflow and set
-                                           // zero
-                                           // flag
+                  if (((registers[a]) & 0xFF00) != 0) {
                      if (registers[a] == 0x0100) {
                         f |= F_ZERO + F_CARRY + F_HALFCARRY;
                         registers[a] = 0;
@@ -1065,9 +980,7 @@ public class Dmgcpu {
 
                   registers[a] += b2;
 
-                  if (((registers[a]) & 0xFF00) != 0) { // Perform 8-bit overflow and set
-                                           // zero
-                                           // flag
+                  if (((registers[a]) & 0xFF00) != 0) {
                      if (registers[a] == 0x0100) {
                         f |= F_ZERO + F_CARRY + F_HALFCARRY;
                         registers[a] = 0;
