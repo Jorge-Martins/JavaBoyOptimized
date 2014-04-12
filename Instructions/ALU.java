@@ -1,34 +1,26 @@
 package Instructions;
 import Emulator.Dmgcpu;
 
-import java.util.*;
 
 public class ALU extends Instruction{
-   private Map<Integer, ALUInstruction> map = new HashMap<Integer, ALUInstruction>();
+   private ALUInstruction[] vec = new ALUInstruction[8];
    
    public ALU(Dmgcpu dmgcpu){
       this.dmgcpu = dmgcpu;
       
-      map.put(0, new ADD_A(dmgcpu));      // ADD A, r
-      map.put(1, new ADC_A(dmgcpu));      // ADC A, r
-      map.put(2, new SUB_A(dmgcpu));      // SUB A, r
-      map.put(3, new SBC_A(dmgcpu));      // SBC A, r
-      map.put(4, new AND_A(dmgcpu));      // AND A, r
-      map.put(5, new XOR_A(dmgcpu));      // XOR A, r
-      map.put(6, new OR_A(dmgcpu));       // OR A, r
-      map.put(7, new CP_A(dmgcpu));       // CP A, r (compare)
+      vec[0] = new ADD_A(dmgcpu);      // ADD A, r
+      vec[1] = new ADC_A(dmgcpu);      // ADC A, r
+      vec[2] = new SUB_A(dmgcpu);      // SUB A, r
+      vec[3] = new SBC_A(dmgcpu);      // SBC A, r
+      vec[4] = new AND_A(dmgcpu);      // AND A, r
+      vec[5] = new XOR_A(dmgcpu);      // XOR A, r
+      vec[6] = new OR_A(dmgcpu);       // OR A, r
+      vec[7] = new CP_A(dmgcpu);       // CP A, r (compare)
    }
    
    public void execute(int b1, int b2, int b3, int offset){
-      ALUInstruction i = map.get((b1 & 0x38) >> 3);
-      
-      if(i != null){    
-         dmgcpu.pc++;
-         i.execute(b1);
-         //System.out.println("ALU executed: " + i.toString());
-      }
-      
-     
+      dmgcpu.pc++;
+      vec[((b1 & 0x38) >> 3)].execute(b1);
    }
 }
 

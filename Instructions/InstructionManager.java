@@ -39,10 +39,12 @@ public class InstructionManager {
       instructionMap.put(0x1E, new LD_R(e, dmgcpu));                                   // LD E, nn
       instructionMap.put(0x18, new JR(dmgcpu));                                        // JR nn
       instructionMap.put(0x20, new JR_F(dmgcpu.F_ZERO, (short)0, dmgcpu));             // JR NZ, nn
+      instructionMap.put(0x26, new LD_H_L(0x00FF, 8, dmgcpu));                         // LD H, nn
       instructionMap.put(0x27, new DAA(dmgcpu));                                       // DAA
       instructionMap.put(0x28, new JR_F(dmgcpu.F_ZERO, dmgcpu.F_ZERO, dmgcpu));        // JR Z, nn
       instructionMap.put(0x29, new ADD("hl", dmgcpu));                                 // ADD HL, HL
       instructionMap.put(0x2D, new DEC_L(dmgcpu));                                     // DEC L
+      instructionMap.put(0x2E, new LD_H_L(0xFF00, 0, dmgcpu));                         // LD L, nn
       instructionMap.put(0x30, new JR_F(dmgcpu.F_CARRY, (short)0, dmgcpu));            // JR NC, nn
       instructionMap.put(0x38, new JR_F(dmgcpu.F_CARRY, dmgcpu.F_CARRY, dmgcpu));      // JR C, nn
       instructionMap.put(0x39, new ADD("sp", dmgcpu));                                 // ADD HL, SP
@@ -71,20 +73,28 @@ public class InstructionManager {
       instructionMap.put(0xC2, new JP_F(dmgcpu.F_ZERO, (short)0, dmgcpu));             // JP NZ, nnnn
       instructionMap.put(0xC3, new JP(dmgcpu));                                        // JP nnnn
       instructionMap.put(0xC4, new CALL_F(dmgcpu.F_ZERO, (short)0, dmgcpu));           // CALL  NZ, nnnn
+      instructionMap.put(0xC7, new RST(0x00, dmgcpu));                                 // RST 00
       instructionMap.put(0xC8, new RET_F(dmgcpu.F_ZERO, dmgcpu.F_ZERO, dmgcpu));       // RET Z, nnnn
       instructionMap.put(0xC9, new RET(dmgcpu));                                       // RET nnnn
       instructionMap.put(0xCA, new JP_F(dmgcpu.F_ZERO, dmgcpu.F_ZERO, dmgcpu));        // JP Z, nnnn
       instructionMap.put(0xCB, new ExtOps(dmgcpu));                                    // ExtOps
       instructionMap.put(0xCC, new CALL_F(dmgcpu.F_ZERO, dmgcpu.F_ZERO, dmgcpu));      // CALL Z, nnnn
       instructionMap.put(0xCD, new CALL(dmgcpu));                                      // CALL nnnn
+      instructionMap.put(0xCF, new RST(0x08, dmgcpu));                                 // RST 08
       instructionMap.put(0xD0, new RET_F(dmgcpu.F_CARRY, (short)0, dmgcpu));           // RET NC, nnnn
       instructionMap.put(0xD2, new JP_F(dmgcpu.F_CARRY, (short)0, dmgcpu));            // JP NC, nnnn
       instructionMap.put(0xD4, new CALL_F(dmgcpu.F_CARRY, (short)0, dmgcpu));          // CALL NC, nnnn
+      instructionMap.put(0xD7, new RST(0x10, dmgcpu));                                 // RST 10
       instructionMap.put(0xD8, new RET_F(dmgcpu.F_CARRY, dmgcpu.F_CARRY, dmgcpu));     // RET C, nnnn
       instructionMap.put(0xDA, new JP_F(dmgcpu.F_CARRY, dmgcpu.F_CARRY, dmgcpu));      // JP C, nnnn
       instructionMap.put(0xDC, new CALL_F(dmgcpu.F_CARRY, dmgcpu.F_CARRY, dmgcpu));    // CALL C, nnnn
+      instructionMap.put(0xDF, new RST(0x18, dmgcpu));                                 // RST 18
+      instructionMap.put(0xE7, new RST(0x20, dmgcpu));                                 // RST 20
+      instructionMap.put(0xEF, new RST(0x28, dmgcpu));                                 // RST 28
       instructionMap.put(0xF2, new LD_A(dmgcpu));                                      // LD A, (FF00 + C)
+      instructionMap.put(0xF7, new RST(0x30, dmgcpu));                                 // RST 30
       instructionMap.put(0xFA, new LD_A_nn(dmgcpu));                                   // LD A, (nnnn)
+      instructionMap.put(0xFF, new RST(0x38, dmgcpu));                                 // RST 38
    }
    
    public InstructionManager(Dmgcpu dmgcpu){

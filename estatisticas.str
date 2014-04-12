@@ -19,17 +19,17 @@ passados 2 minutos:
 55      16278   SCF
 56      239480  JR C,n			ok
 58      6065    LDD A,(HL)
-192     41599   RET NZ
+192     41599   RET NZ			ok
 193     91264   POP BC
 194     147377  JP NZ,nn		ok
 195     190097  JP nn			ok
 197     76605   PUSH BC
 198     333587  ADD A,n
-200     98850   RET Z
+200     98850   RET Z			ok
 201     458168  RET
 202     214083  JP Z,nn			ok
-205     557654  CALL nn
-208     10174   RET NC
+205     557654  CALL nn			ok
+208     10174   RET NC			ok
 209     122659  POP DE
 213     74288   PUSH DE
 214     37299   SUB A,n

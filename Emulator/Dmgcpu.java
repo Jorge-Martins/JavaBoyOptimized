@@ -48,6 +48,7 @@ public class Dmgcpu {
    /** Registers: 16-bit */
    public int sp, pc, hl;
 
+   //private Stats stats = new Stats();
    /**
     * The number of instructions that have been executed since the last reset
     */
@@ -266,12 +267,8 @@ public class Dmgcpu {
          // write io state
          ioHandler.saveData(sv, directory);
          
-         
-//         for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-//            if(entry.getValue() > 5000){
-//               System.out.println(entry.getKey() + "\t" + entry.getValue() + "\t" + s[entry.getKey()]);
-//            }
-//        }
+         //stats.printStats();
+
          sv.close();
          fl.close();
 
@@ -445,38 +442,6 @@ public class Dmgcpu {
             break;
       }
 
-   }
-
-   public final void addressWriteOld(int addr, int data) {
-      if ((addr < 0x8000)) {
-         if (!running) {
-            cartridge.debuggerAddressWrite(addr, data);
-         } else {
-            cartridge.addressWrite(addr, data);
-            
-         }
-      } else if (addr < 0xA000) {
-         try {
-            graphicsChip.addressWrite(addr - 0x8000, (byte) data);
-         } catch (ArrayIndexOutOfBoundsException e) {
-            System.out.println("Error address " + addr);
-         }
-      } else if (addr < 0xC000) {
-         // RAM Bank write
-         
-         cartridge.addressWrite(addr, data);
-      } else if (addr < 0xE000) {
-         mainRam[addr - 0xC000] = (byte) data;
-      } else if (addr < 0xFE00) {
-         mainRam[addr - 0xE000] = (byte) data;
-      } else if (addr < 0xFF00) {
-         oam[addr - 0xFE00] = (byte) data;
-      } else if (addr <= 0xFFFF) {
-         ioHandler.ioWrite(addr - 0xFF00, (short) data);
-         // registers[addr - 0xFF00] = (byte) data;
-      } else {
-         System.out.println("Attempt to write to address " + JavaBoy.hexWord(addr));
-      }
    }
 
    /** Sets the value of a register by it's name */
@@ -765,7 +730,6 @@ public class Dmgcpu {
       }
    }
    
-   //private Map<Integer, Integer> map = new HashMap<Integer, Integer>();
    /**
     * Execute the specified number of Gameboy instructions. Use '-1' to execute
     * forever
@@ -793,13 +757,8 @@ public class Dmgcpu {
          b3 = JavaBoy.unsign(addressRead(pc + 2));
          b2 = JavaBoy.unsign((short) offset);
 
+         //stats.addExecution(b1);
          if(!instructionManager.execute(b1, b2, b3, offset)){
-//            if (map.containsKey(b1)) {
-//               map.put(b1, map.get(b1) + 1);
-//            } else {
-//               map.put(b1, 1);
-//            }
-            
             switch (b1) {
                case 0x07: // RLC A
                   pc++;
@@ -925,10 +884,6 @@ public class Dmgcpu {
                         break;
                   }
                   break;
-               case 0x26: // LD H, nn
-                  pc += 2;
-                  hl = (hl & 0x00FF) | (b2 << 8);
-                  break;
                case 0x2A: // LDI A, (HL)
                   pc++;
                   registers[a] = JavaBoy.unsign(addressRead(hl));
@@ -959,10 +914,6 @@ public class Dmgcpu {
                         break;
                   }
                   break;
-               case 0x2E: // LD L, nn
-                  pc += 2;
-                  hl = (hl & 0xFF00) | b2;
-                  break;
                case 0x2F: // CPL A
                   pc++;
                   
@@ -973,9 +924,9 @@ public class Dmgcpu {
                   pc += 3;
                   sp = (b3 << 8) + b2;
                   break;
-               case 0x32:
+               case 0x32: // LD (HL-), A
                   pc++;
-                  addressWrite(hl, registers[a]); // LD (HL-), A
+                  addressWrite(hl, registers[a]); 
                   hl--;
                   break;
                case 0x33: // INC SP
@@ -1100,13 +1051,6 @@ public class Dmgcpu {
                      }
                   }
                   break;
-               case 0xCF: // RST 08
-                  pc++;
-                  sp -= 2;
-                  addressWrite(sp + 1, pc >> 8);
-                  addressWrite(sp, pc & 0x00FF);
-                  pc = 0x08;
-                  break;
                case 0xCE: // ADC A, nn
                   pc += 2;
 
@@ -1132,14 +1076,6 @@ public class Dmgcpu {
                         registers[a] &= 0x00FF;
                      }
                   }
-                  break;
-               case 0xC7: // RST 00
-                  pc++;
-                  sp -= 2;
-                  addressWrite(sp + 1, pc >> 8);
-                  addressWrite(sp, pc & 0x00FF);
-                  // terminate = true;
-                  pc = 0x00;
                   break;
                case 0xD1: // POP DE
                   pc++;
@@ -1173,13 +1109,6 @@ public class Dmgcpu {
                      f |= F_ZERO;
                   }
                   break;
-               case 0xD7: // RST 10
-                  pc++;
-                  sp -= 2;
-                  addressWrite(sp + 1, pc >> 8);
-                  addressWrite(sp, pc & 0x00FF);
-                  pc = 0x10;
-                  break;
                case 0xD9: // RETI
                   interruptsEnabled = true;
                   inInterrupt = false;
@@ -1207,13 +1136,6 @@ public class Dmgcpu {
                   if (registers[a] == 0) {
                      f |= F_ZERO;
                   }
-                  break;
-               case 0xDF: // RST 18
-                  pc++;
-                  sp -= 2;
-                  addressWrite(sp + 1, pc >> 8);
-                  addressWrite(sp, pc & 0x00FF);
-                  pc = 0x18;
                   break;
                case 0xE0: // LDH (FFnn), A
                   pc += 2;
@@ -1244,13 +1166,6 @@ public class Dmgcpu {
                      f = 0;
                   }
                   break;
-               case 0xE7: // RST 20
-                  pc++;
-                  sp -= 2;
-                  addressWrite(sp + 1, pc >> 8);
-                  addressWrite(sp, pc & 0x00FF);
-                  pc = 0x20;
-                  break;
                case 0xE8: // ADD SP, nn
                   pc += 2;
                   sp = (sp + offset);
@@ -1278,13 +1193,6 @@ public class Dmgcpu {
                      f = 0;
                   }
                   break;
-               case 0xEF: // RST 28
-                  pc++;
-                  sp -= 2;
-                  addressWrite(sp + 1, pc >> 8);
-                  addressWrite(sp, pc & 0x00FF);
-                  pc = 0x28;
-                  break;
                case 0xF0: // LDH A, (FFnn)
                   pc += 2;
                   registers[a] = JavaBoy.unsign(addressRead(0xFF00 + b2));
@@ -1298,7 +1206,6 @@ public class Dmgcpu {
                case 0xF3: // DI
                   pc++;
                   interruptsEnabled = false;
-                  // addressWrite(0xFFFF, 0);
                   break;
                case 0xF5: // PUSH AF
                   pc++;
@@ -1315,13 +1222,6 @@ public class Dmgcpu {
                   } else {
                      f = 0;
                   }
-                  break;
-               case 0xF7: // RST 30
-                  pc++;
-                  sp -= 2;
-                  addressWrite(sp + 1, pc >> 8);
-                  addressWrite(sp, pc & 0x00FF);
-                  pc = 0x30;
                   break;
                case 0xF8: // LD HL, SP + nn ** HALFCARRY FLAG NOT SET ***
                   pc += 2;
@@ -1351,13 +1251,6 @@ public class Dmgcpu {
                         f |= F_CARRY;
                      }
                   }
-                  break;
-               case 0xFF: // RST 38
-                  pc++;
-                  sp -= 2;
-                  addressWrite(sp + 1, pc >> 8);
-                  addressWrite(sp, pc & 0x00FF);
-                  pc = 0x38;
                   break;
 
                default:
@@ -1964,23 +1857,4 @@ public class Dmgcpu {
       return null;
    }
    
-   
-//   private String s[] ={
-//            "NOP", "LD BC,nn", "LD (BC),A", "INC BC", "INC B", "DEC B", "LD B,n", "RLC A", "LD (nn),SP", "ADD HL,BC", "LD A,(BC)", "DEC BC", "INC C", "DEC C", "LD C,n", "RRC A",
-//            "STOP",  "LD DE,nn", "LD (DE),A", "INC DE", "INC D", "DEC D", "LD D,n", "RL A", "JR n", "ADD HL,DE", "LD A,(DE)", "DEC DE", "INC E", "DEC E", "LD E,n", "RR A",
-//            "JR NZ,n", "LD HL,nn", "LDI (HL),A", "INC HL", "INC H", "DEC H", "LD H,n", "DAA", "JR Z,n", "ADD HL,HL", "LDI A,(HL)", "DEC HL", "INC L", "DEC L", "LD L,n", "CPL",
-//            "JR NC,n", "LD SP,nn", "LDD (HL),A", "INC SP", "INC (HL)", "DEC (HL)", "LD (HL),n", "SCF", "JR C,n", "ADD HL,SP", "LDD A,(HL)", "DEC SP", "INC A", "DEC A", "LD A,n", "CCF",
-//            "LD B,B", "LD B,C", "LD B,D", "LD B,E", "LD B,H", "LD B,L", "LD B,(HL)", "LD B,A", "LD C,B", "LD C,C", "LD C,D", "LD C,E", "LD C,H", "LD C,L", "LD C,(HL)", "LD C,A",
-//            "LD D,B", "LD D,C", "LD D,D", "LD D,E", "LD D,H", "LD D,L", "LD D,(HL)", "LD D,A", "LD E,B", "LD E,C", "LD E,D", "LD E,E", "LD E,H", "LD E,L", "LD E,(HL)", "LD E,A",
-//            "LD H,B", "LD H,C", "LD H,D", "LD H,E", "LD H,H", "LD H,L", "LD H,(HL)", "LD H,A", "LD L,B", "LD L,C", "LD L,D", "LD L,E", "LD L,H", "LD L,L", "LD L,(HL)", "LD L,A",
-//            "LD (HL),B", "LD (HL),C", "LD (HL),D", "LD (HL),E", "LD (HL),H", "LD (HL),L", "HALT", "LD (HL),A", "LD A,B", "LD A,C", "LD A,D", "LD A,E", "LD A,H", "LD A,L", "LD A,(HL)", "LD A,A",
-//            "ADD A,B", "ADD A,C", "ADD A,D", "ADD A,E", "ADD A,H", "ADD A,L", "ADD A,(HL)",  "ADD A,A", "ADC A,B", "ADC A,C", "ADC A,D", "ADC A,E", "ADC A,H", "ADC A,L", "ADC A,(HL)", "ADC A,A",
-//            "SUB A,B", "SUB A,C", "SUB A,D", "SUB A,E", "SUB A,H", "SUB A,L", "SUB A,(HL)",  "SUB A,A", "SBC A,B", "SBC A,C", "SBC A,D", "SBC A,E", "SBC A,H", "SBC A,L", "SBC A,(HL)", "SBC A,A",
-//            "AND B", "AND C", "AND D", "AND E", "AND H", "AND L", "AND (HL)", "AND A", "XOR B", "XOR C", "XOR D", "XOR E", "XOR H", "XOR L", "XOR (HL)", "XOR A",
-//            "OR B", "OR C", "OR D", "OR E", "OR H", "OR L", "OR (HL)", "OR A", "CP B", "CP C", "CP D", "CP E", "CP H", "CP L", "CP (HL)", "CP A",
-//            "RET NZ", "POP BC", "JP NZ,nn", "JP nn", "CALL NZ,nn", "PUSH BC", "ADD A,n", "RST 0", "RET Z", "RET", "JP Z,nn", "Ext ops", "CALL Z,nn", "CALL nn", "ADC A,n", "RST 8",
-//            "RET NC", "POP DE", "JP NC,nn", "XX", "CALL NC,nn", "PUSH DE", "SUB A,n", "RST 10", "RET C", "RETI", "JP C,nn", "XX", "CALL C,nn", "XX", "SBC A,n", "RST 18",
-//            "LDH (n),A", "POP HL", "LDH (C),A", "XX", "XX", "PUSH HL", "AND n", "RST 20", "ADD SP,d", "JP (HL)", "LD (nn),A", "XX", "XX", "XX", "XOR n", "RST 28",
-//            "LDH A,(n)", "POP AF", "XX", "DI", "XX", "PUSH AF", "OR n", "RST 30", "LDHL SP,d", "LD SP,HL", "LD A,(nn)", "EI", "XX", "XX", "CP n", "RST 38" 
-//   };
 }

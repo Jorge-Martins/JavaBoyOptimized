@@ -1,55 +1,45 @@
 package Instructions;
 import Emulator.Dmgcpu;
 
-import java.util.*;
-
 /*
  * Extended Operations (Two byte instruction codes)
  * 
  */
 public class ExtOps extends Instruction {
-   private Map<Integer, Instruction> map1 = new HashMap<Integer, Instruction>();
-   private Map<Integer, Instruction> map2 = new HashMap<Integer, Instruction>();
+   private Instruction[] vec1 = new Instruction[8];
+   private Instruction[] vec2 = new Instruction[3];
 
    public ExtOps(Dmgcpu dmgcpu) {
       this.dmgcpu = dmgcpu;
 
-      map1.put(0x00, new RLC_A(dmgcpu));     // RLC A
-      map1.put(0x08, new RRC_A(dmgcpu));     // RRC A
-      map1.put(0x10, new RL_r(dmgcpu));      // RL r
-      map1.put(0x18, new RR_r(dmgcpu));      // RR r
-      map1.put(0x20, new SLA_r(dmgcpu));     // SLA r
-      map1.put(0x28, new SRA_r(dmgcpu));     // SRA r
-      map1.put(0x30, new SWAP_r(dmgcpu));    // SWAP r
-      map1.put(0x38, new SRL_r(dmgcpu));     // SRL r
+      vec1[0] = new RLC_A(dmgcpu);     // RLC A    0x00
+      vec1[1] = new RRC_A(dmgcpu);     // RRC A    0x08
+      vec1[2] = new RL_r(dmgcpu);      // RL r     0x10
+      vec1[3] = new RR_r(dmgcpu);      // RR r     0x18
+      vec1[4] = new SLA_r(dmgcpu);     // SLA r    0x20
+      vec1[5] = new SRA_r(dmgcpu);     // SRA r    0x28
+      vec1[6] = new SWAP_r(dmgcpu);    // SWAP r   0x30
+      vec1[7] = new SRL_r(dmgcpu);     // SRL r    0x38
 
-      map2.put(0x40, new BIT_n(dmgcpu));     // BIT n, r
-      map2.put(0x80, new RES_n(dmgcpu));     // RES n, r
-      map2.put(0xC0, new SET_n(dmgcpu));     // SET n, r
+      vec2[0] = new BIT_n(dmgcpu);     // BIT n, r    0x40
+      vec2[1] = new RES_n(dmgcpu);     // RES n, r    0x80
+      vec2[2] = new SET_n(dmgcpu);     // SET n, r    0xC0
    }
 
    public void execute(int b1, int b2, int b3, int offset) {
-      Instruction i;
+      int i;
       dmgcpu.pc += 2;
 
       if ((b2 & 0xC0) == 0) {
-         i = map1.get((b2 & 0xF8));
-
-         if (i != null) {
-            i.execute(b1, b2, b3, offset);
-            // System.out.println("ExtOps executed: " + i.toString());
-         } else {
-            System.out.println("ExtOps error: Instruction not found in map1: op = " + (b2 & 0xF8));
-         }
-      } else {
-          i = map2.get((b2 & 0xC0));
+         i = (b2 & 0xF8) / 0x08;
+     
+         vec1[i].execute(b1, b2, b3, offset);
          
-         if (i != null) {
-            i.execute(b1, b2, b3, offset);
-            //System.out.println("ExtOps executed: " + i.toString());
-         } else {
-            System.out.println("ExtOps error: Instruction not found in map2: op = " + (b2 & 0xC0));
-         }
+      } else {
+          i = ((b2 & 0xC0) / 0x40) - 1;
+      
+         vec2[i].execute(b1, b2, b3, offset);
+      
       }
    }
 }
