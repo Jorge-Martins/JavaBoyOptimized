@@ -61,20 +61,20 @@ public class Dmgcpu {
    boolean loadCheckpointInterrupt = false;
 
    /** Used to implement the IE delay slot */
-   int ieDelay = -1;
+   public int ieDelay = -1;
 
    boolean timaEnabled = false;
    int instrsPerTima = 6000;
 
    /** TRUE when the CPU is currently processing an interrupt */
-   boolean inInterrupt = false;
+   public boolean inInterrupt = false;
 
    /**
     * Enable the breakpoint flag. As breakpoint instruction is used in some
     * games, this is used to skip over it unless the breakpoint is actually in
     * use
     */
-   boolean breakpointEnable = false;
+   public boolean breakpointEnable = false;
 
    // Constants for flags register
 
@@ -736,7 +736,6 @@ public class Dmgcpu {
     */
    public final void execute(int numInstr) {
       terminate = false;
-      int dat;
       running = true;
       graphicsChip.startTime = System.currentTimeMillis();
       int b1, b2, b3, offset;
@@ -744,11 +743,6 @@ public class Dmgcpu {
       long t;
       for (int r = 0; (r != numInstr) && (!terminate); r++) {
          t = System.currentTimeMillis();
-         
-         if((t - initialTime) > checkpointTime){
-            initialTime = t;
-            saveCheckpointInterrupt = true;
-         }
          
          instrCount++;
 
@@ -758,215 +752,26 @@ public class Dmgcpu {
          b2 = JavaBoy.unsign((short) offset);
 
          //stats.addExecution(b1);
-         if(!instructionManager.execute(b1, b2, b3, offset)){
-            switch (b1) {
-               case 0x23: // INC HL
-                  pc++;
-                  hl = (hl + 1) & 0xFFFF;
-                  break;
-               case 0x2A: // LDI A, (HL)
-                  pc++;
-                  registers[a] = JavaBoy.unsign(addressRead(hl));
-                  hl++;
-                  break;
-               case 0x2B: // DEC HL
-                  pc++;
-                  if (hl == 0) {
-                     hl = 0xFFFF;
-                  } else {
-                     hl--;
-                  }
-                  break;
-               case 0x2F: // CPL A
-                  pc++;            
-                  registers[a] = (short) ((~(registers[a])) & 0x00FF);
-                  f = (short) ((f & (F_CARRY | F_ZERO)) | F_SUBTRACT | F_HALFCARRY);
-                  break;
-               case 0x33: // INC SP
-                  pc++;
-                  sp = (sp + 1) & 0xFFFF;
-                  break;
-               case 0x34: // INC (HL)
-                  pc++;
-                  f &= F_CARRY;
-                  dat = JavaBoy.unsign(addressRead(hl));
-                  switch (dat) {
-                     case 0xFF:
-                        f |= F_HALFCARRY + F_ZERO;
-                        addressWrite(hl, 0x00);
-                        break;
-                     case 0x0F:
-                        f |= F_HALFCARRY;
-                        addressWrite(hl, 0x10);
-                        break;
-                     default:
-                        addressWrite(hl, dat + 1);
-                        break;
-                  }
-                  break;
-               case 0x35: // DEC (HL)
-                  pc++;
-                  f &= F_CARRY;
-                  f |= F_SUBTRACT;
-                  dat = JavaBoy.unsign(addressRead(hl));
-                  switch (dat) {
-                     case 0x00:
-                        f |= F_HALFCARRY;
-                        addressWrite(hl, 0xFF);
-                        break;
-                     case 0x10:
-                        f |= F_HALFCARRY;
-                        addressWrite(hl, 0x0F);
-                        break;
-                     case 0x01:
-                        f |= F_ZERO;
-                        addressWrite(hl, 0x00);
-                        break;
-                     default:
-                        addressWrite(hl, dat - 1);
-                        break;
-                  }
-                  break;
-               case 0x36: // LD (HL), nn
-                  pc += 2;
-                  addressWrite(hl, b2);
-                  break;
-               case 0x37: // SCF
-                  pc++;
-                  f &= F_ZERO;
-                  f |= F_CARRY;
-                  break;
-               case 0x3A: // LD A, (HL-)
-                  pc++;
-                  registers[a] = JavaBoy.unsign(addressRead(hl));
-                  hl = (hl - 1) & 0xFFFF;
-                  break;
-               case 0x3B: // DEC SP
-                  pc++;
-                  sp = (sp - 1) & 0xFFFF;
-                  break;
-               case 0x3F: // CCF
-                  pc++;
-                  if ((f & F_CARRY) == 0) {
-                     f = (short) ((f & F_ZERO) | F_CARRY);
-                  } else {
-                     f = (short) (f & F_ZERO);
-                  }
-                  break;
-               case 0x52: // LD D, D
-                  if (breakpointEnable) {
-                     terminate = true;
-                     System.out.println("- Breakpoint reached");
-                  } else {
-                     pc++;
-                  }
-                  break;
-               case 0xAF: // XOR A, A 
-                  pc++;
-                  registers[a] = 0;
-                  f = F_ZERO;
-                  break;
-               case 0xD9: // RETI
-                  interruptsEnabled = true;
-                  inInterrupt = false;
-                  pc = (JavaBoy.unsign(addressRead(sp + 1)) << 8) + JavaBoy.unsign(addressRead(sp));
-                  sp += 2;
-                  break;
-               case 0xE0: // LDH (FFnn), A
-                  pc += 2;
-                  addressWrite(0xFF00 + b2, registers[a]);
-                  break;
-               case 0xE1: // POP HL
-                  pc++;
-                  hl = (JavaBoy.unsign(addressRead(sp + 1)) << 8) + JavaBoy.unsign(addressRead(sp));
-                  sp += 2;
-                  break;
-               case 0xE2: // LDH (FF00 + C), A
-                  pc++;
-                  addressWrite(0xFF00 + registers[c], registers[a]);
-                  break;
-               case 0xE5: // PUSH HL
-                  pc++;
-                  sp -= 2;
-                  sp &= 0xFFFF;
-                  addressWrite(sp + 1, hl >> 8);
-                  addressWrite(sp, hl & 0x00FF);
-                  break;
-               case 0xE8: // ADD SP, nn
-                  pc += 2;
-                  sp = (sp + offset);
-                  if ((sp & 0xFFFF0000) != 0) {
-                     f = (short) ((f & (F_SUBTRACT + F_ZERO + F_HALFCARRY)) | (F_CARRY));
-                     sp &= 0xFFFF;
-                  } else {
-                     f = (short) ((f & (F_SUBTRACT + F_ZERO + F_HALFCARRY)));
-                  }
-                  break;
-               case 0xE9: // JP (HL)
-                  pc++;
-                  pc = hl;
-                  break;
-               case 0xEA: // LD (nnnn), A
-                  pc += 3;
-                  addressWrite((b3 << 8) + b2, registers[a]);
-                  break;
-               case 0xF0: // LDH A, (FFnn)
-                  pc += 2;
-                  registers[a] = JavaBoy.unsign(addressRead(0xFF00 + b2));
-                  break;
-               case 0xF1: // POP AF
-                  pc++;
-                  f = JavaBoy.unsign(addressRead(sp));
-                  registers[a] = JavaBoy.unsign(addressRead(sp + 1));
-                  sp += 2;
-                  break;
-               case 0xF3: // DI
-                  pc++;
-                  interruptsEnabled = false;
-                  break;
-               case 0xF5: // PUSH AF
-                  pc++;
-                  sp -= 2;
-                  sp &= 0xFFFF;
-                  addressWrite(sp, f);
-                  addressWrite(sp + 1, registers[a]);
-                  break;
-               case 0xF8: // LD HL, SP + nn ** HALFCARRY FLAG NOT SET ***
-                  pc += 2;
-                  hl = (sp + offset);
-                  if ((hl & 0x10000) != 0) {
-                     f = F_CARRY;
-                     hl &= 0xFFFF;
-                  } else {
-                     f = 0;
-                  }
-                  break;
-               case 0xF9: // LD SP, HL
-                  pc++;
-                  sp = hl;
-                  break;
-               case 0xFB: // EI
-                  pc++;
-                  ieDelay = 1;
-                  break;
-
-               default:
-                  System.out.println("Unrecognized opcode (" + JavaBoy.hexByte(b1) + ")");
-                  terminate = true;
-                  pc++;
-                  break;
-            }
-         }
+         instructionManager.execute(b1, b2, b3, offset);
          
          if (ieDelay != -1) {
-
             if (ieDelay > 0) {
                ieDelay--;
             } else {
                interruptsEnabled = true;
                ieDelay = -1;
             }
-
+         }
+         
+         if (interruptsEnabled) {
+            checkInterrupts();
+         }
+         cartridge.update();
+         initiateInterrupts();
+         
+         if((t - initialTime) > checkpointTime){
+            initialTime = t;
+            saveCheckpointInterrupt = true;
          }
 
          if(saveInterrupt){
@@ -985,13 +790,6 @@ public class Dmgcpu {
             loadState(".cksv");
             loadCheckpointInterrupt = false;
          }
-         
-         if (interruptsEnabled) {
-            checkInterrupts();
-         }
-         cartridge.update();
-         initiateInterrupts();
-         
       }
       running = false;
       terminate = false;
