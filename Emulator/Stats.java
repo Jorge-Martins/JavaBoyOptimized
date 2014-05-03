@@ -1,10 +1,14 @@
 package Emulator;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 
 public class Stats {
-   private Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+   private int[] map = new int[256];
+   private ArrayList<Integer> instructions = new ArrayList<Integer>();
+   private PrintWriter writer;
    
    private String s[] = { "NOP", "LD BC,nn", "LD (BC),A", "INC BC", "INC B", "DEC B", "LD B,n",
             "RLC A", "LD (nn),SP", "ADD HL,BC", "LD A,(BC)", "DEC BC", "INC C", "DEC C", "LD C,n",
@@ -40,18 +44,35 @@ public class Stats {
             "LD A,(nn)", "EI", "XX", "XX", "CP n", "RST 38" };
 
    public void printStats() {
-      for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-         if (entry.getValue() > 5000) {
-            System.out.println(entry.getKey() + "\t" + entry.getValue() + "\t" + s[entry.getKey()]);
+      try{
+         writer = new PrintWriter("../estatisticas.str", "UTF-8");
+         
+         for (int i = 0; i < 256; i++) {
+            if (map[i] > 0000) {
+               writer.println(i + "\t" + map[i] + "\t" + s[i]);
+            }
          }
+         
+         writer.println("\n");
+         for (int i : instructions) {
+            if (map[i] > 0000) {
+               writer.println(i);
+            }
+         }
+         
+         writer.close();
+         
+      } catch(FileNotFoundException e){
+         System.out.println("Stats: File not found " + e.getMessage());
+      } catch (UnsupportedEncodingException e) {
+         System.out.println("Stats: unsuported operation " + e.getMessage());
       }
+      
+      
    }
 
    public void addExecution(int b1) {
-      if (map.containsKey(b1)) {
-         map.put(b1, map.get(b1) + 1);
-      } else {
-         map.put(b1, 1);
-      }
+      map[b1]++;
+      instructions.add(b1);
    }
 }
