@@ -1,5 +1,6 @@
 package Instructions;
 import Emulator.Dmgcpu;
+import Emulator.JavaBoy;
 
 public class InstructionManager {
    private final int a = 7, b = 0, c = 1, d = 2, e = 3;
@@ -172,6 +173,36 @@ public class InstructionManager {
    }
    
    public void execute(int b1, int b2, int b3, int offset){
+      
       instructions[b1].execute(b1, b2, b3, offset);
+      
+      if(b1 == 32){
+         if(JavaBoy.unsign(dmgcpu.addressRead(dmgcpu.pc)) == 61){
+            instructions[61].execute(0, 0, 0, 0);
+            
+            if(JavaBoy.unsign(dmgcpu.addressRead(dmgcpu.pc)) == 234){
+               instructions[234].execute(0, JavaBoy.unsign((short) dmgcpu.addressRead(dmgcpu.pc + 1)), JavaBoy.unsign(dmgcpu.addressRead(dmgcpu.pc + 2)), 0);
+               instructions[167].execute(JavaBoy.unsign(dmgcpu.addressRead(dmgcpu.pc)), 0, 0, 0);
+               instructions[192].execute(0, 0, 0, 0);
+            }
+            
+         } 
+         else if(JavaBoy.unsign(dmgcpu.addressRead(dmgcpu.pc)) == 111){
+            instructions[111].execute(111, 0, 0, 0);
+            instructions[214].execute(0, JavaBoy.unsign((short) dmgcpu.addressRead(dmgcpu.pc + 1)), 0, 0);
+            instructions[79].execute(79, 0, 0, 0);
+            instructions[224].execute(0, JavaBoy.unsign((short) dmgcpu.addressRead(dmgcpu.pc + 1)), 0, 0);
+            instructions[126].execute(126, 0, 0, 0);
+            instructions[167].execute(JavaBoy.unsign(dmgcpu.addressRead(dmgcpu.pc)), 0, 0, 0);
+            instructions[40].execute(0, 0, 0, dmgcpu.addressRead(dmgcpu.pc + 1));
+         }
+
+         b1 = JavaBoy.unsign(dmgcpu.addressRead(dmgcpu.pc));
+         offset = dmgcpu.addressRead(dmgcpu.pc + 1);
+         b3 = JavaBoy.unsign(dmgcpu.addressRead(dmgcpu.pc + 2));
+         b2 = JavaBoy.unsign((short) offset);
+         
+         instructions[b1].execute(b1, b2, b3, offset);
+      }
    }
 }
