@@ -83,10 +83,6 @@ class GameBoyScreen extends Frame implements ActionListener, ComponentListener, 
    CheckboxMenuItem   soundVolume25;
    CheckboxMenuItem   soundVolume0;
 
-   CheckboxMenuItem   emulationSpeed100;
-   CheckboxMenuItem   emulationSpeed200;
-   CheckboxMenuItem   emulationSpeed400;
-
    CheckboxMenuItem   networkServer;
    CheckboxMenuItem   fileGameboyColor;
 
@@ -269,17 +265,6 @@ class GameBoyScreen extends Frame implements ActionListener, ComponentListener, 
       emulationLoadCheckpoint.setActionCommand("Load Checkpoint");
       emulationLoadCheckpoint.addActionListener(this);
 
-      emulationSpeed100 = new CheckboxMenuItem("Speed 100%");
-      emulationSpeed100.addItemListener(this);
-      emulationSpeed100.setState(true);
-
-      emulationSpeed200 = new CheckboxMenuItem("Speed 200%");
-      emulationSpeed200.addItemListener(this);
-
-      emulationSpeed400 = new CheckboxMenuItem("Speed 400%");
-      emulationSpeed400.addItemListener(this);
-      // <<<<<<<<
-
       Menu fileMenu = new Menu("File");
       Menu viewMenu = new Menu("View");
       Menu soundMenu = new Menu("Sound");
@@ -341,10 +326,6 @@ class GameBoyScreen extends Frame implements ActionListener, ComponentListener, 
       emulationMenu.add(emulationSaveState);
       emulationMenu.add(emulationLoadState);
       emulationMenu.add(emulationLoadCheckpoint);
-      emulationMenu.add(new MenuItem("-"));
-      emulationMenu.add(emulationSpeed100);
-      emulationMenu.add(emulationSpeed200);
-      emulationMenu.add(emulationSpeed400);
 
       networkMenu.add(networkConnect);
       networkMenu.add(networkServer);
